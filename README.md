@@ -1,5 +1,8 @@
 # 🚀 Beyond Earth: Junior Astronaut Trainer
 🎮 Play it live: https://رابطكم.streamlit.app](https://beyond-earth.streamlit.app/
+
+
+
 لعبة ويب يختار فيها الطفل كوكب جديد للبشر، وكل الأرقام فيها من ناسا.
 
 ## 📁 الملفات
