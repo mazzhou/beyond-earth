@@ -1,5 +1,5 @@
 # 🚀 Beyond Earth: Junior Astronaut Trainer
-🎮 Play it live: [https://رابطكم.streamlit.app](https://beyond-earth.streamlit.app/](https://beyond-earth.streamlit.app/)
+🎮 Play it live: [https://beyond-earth.streamlit.app/]
 
 
 
