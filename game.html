@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1240;--panel:#17205c;--panel2:#111a4c;--line:rgba(255,255,255,.13);--text:#f2f6ff;--muted:#aab6e6;
+  --lime:#22d3ee;--gold:#ffc83d;--purple:#8b5cf6;--pink:#e255a1;--red:#ff5c8a;--cyan:#22d3ee;--hull1:#1d2770;--hull2:#141c55;--floor:#26318a;--fs:1}
+.light{--bg:#eaf4ff;--panel:#ffffff;--panel2:#f2f7ff;--line:#cfe0f5;--text:#14204a;--muted:#5a6a99;--lime:#0bb5d6;--gold:#e0a106;--hull1:#d9e8ff;--hull2:#c4d9fb;--floor:#e6f0ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:radial-gradient(1000px 600px at 70% 10%,#1e2a80 0,transparent 60%),radial-gradient(800px 500px at 10% 90%,#2a1a6e 0,transparent 60%),var(--bg);color:var(--text);font-family:'Baloo Bhaijaan 2','Fredoka',sans-serif;overflow:hidden;user-select:none}
+body{font-size:calc(16px*var(--fs))}
+.noanim *{animation:none!important;transition:none!important}
+button{font-family:'Baloo Bhaijaan 2','Fredoka';cursor:pointer}
+input{font-family:'Baloo Bhaijaan 2','Fredoka'}
+
+/* HUD */
+.hud{position:absolute;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  background:rgba(12,18,64,.75);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:30;direction:ltr}
+.light .hud{background:rgba(255,255,255,.85)}
+.hud.hide{display:none}
+.logo{font-family:'Fredoka';font-weight:700;letter-spacing:1px;font-size:19px;line-height:1;display:flex;align-items:center;gap:10px;padding:6px 16px 6px 8px;border:1.5px solid var(--line);border-radius:999px}
+.logo:before{content:'🪐';font-size:24px}
+.logo small{display:block;font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:3px}
+.hud .right{display:flex;gap:10px;align-items:center}
+.chip{font-family:'Fredoka';font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 14px;border-radius:999px;border:1px solid var(--lime);color:var(--lime);white-space:nowrap}
+.chip.gold{border-color:var(--gold);color:var(--gold)}
+.chip.me{font-family:'Baloo Bhaijaan 2','Fredoka';font-size:13px;letter-spacing:0;display:flex;align-items:center;gap:6px;padding:3px 10px 3px 4px}
+.chip.me svg{width:30px;height:30px}
+.iconbtn{width:44px;height:44px;border-radius:50%;border:2px solid rgba(34,211,238,.6);background:var(--panel2);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.iconbtn:hover{border-color:var(--lime);box-shadow:0 0 12px rgba(34,211,238,.35)}
+
+.screen{position:absolute;top:64px;left:0;right:0;bottom:0;display:none}
+.screen.full{top:0}
+.screen.on{display:block}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:18px;text-align:center;padding:20px}
+.title{font-size:calc(34px*var(--fs));font-weight:800}
+.sub{color:var(--muted);font-size:calc(16px*var(--fs))}
+.btn{border:2px solid var(--lime);color:var(--lime);background:transparent;border-radius:999px;padding:11px 26px;font-weight:800;font-size:calc(17px*var(--fs));transition:.15s}
+.btn:hover{background:var(--lime);color:#06213a;box-shadow:0 0 22px rgba(34,211,238,.45)}
+.btn.solid{background:linear-gradient(180deg,#5ee7ff,#22d3ee);color:#06213a;border:3px solid #fff;box-shadow:0 5px 0 #0e7f9a,0 10px 24px rgba(34,211,238,.35)}
+.btn.solid:hover{transform:translateY(-2px);box-shadow:0 7px 0 #0e7f9a,0 14px 28px rgba(34,211,238,.45)}
+.btn.solid:active{transform:translateY(3px);box-shadow:0 2px 0 #0e7f9a}
+.btn.ghost{border-color:var(--line);color:var(--text)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+
+/* الخلفية المحترقة */
+.burn{position:absolute;inset:0;background:#120806 center/cover no-repeat;animation:kb 30s ease-in-out infinite alternate}
+@keyframes kb{to{transform:scale(1.08) translate(-1%,-1%)}}
+.burnfx{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.grade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,4,4,.2),rgba(6,4,4,.85) 75%),linear-gradient(180deg,transparent 60%,rgba(6,4,4,.9))}
+.heat{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 95%,rgba(255,120,30,.35),transparent 55%);animation:flicker 2.8s infinite}
+@keyframes flicker{0%,100%{opacity:.7}20%{opacity:1}45%{opacity:.55}70%{opacity:.95}}
+.smoke{position:absolute;bottom:-60px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(45,40,42,.7),rgba(45,40,42,0) 70%);filter:blur(18px);animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.9}100%{transform:translateY(-700px) translateX(60px) scale(1.8);opacity:0}}
+.ember{position:absolute;bottom:-10px;width:5px;height:5px;border-radius:50%;background:#ffb347;box-shadow:0 0 8px 2px #ff7a1a;animation:ember linear infinite}
+@keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(var(--dx),-650px);opacity:0}}
+
+/* القائمة الرئيسية */
+.menu{position:absolute;top:50%;right:7%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;width:min(420px,86%)}
+.gametitle{font-family:'Fredoka';font-weight:800;font-size:calc(46px*var(--fs));line-height:1.05;letter-spacing:2px;color:#fff;direction:ltr;text-align:right;text-shadow:0 4px 30px rgba(255,90,20,.5)}
+.gametitle span{color:#ff8a2a}
+.tagline{color:#f3d9c4;font-size:calc(19px*var(--fs));margin:-4px 0 18px}
+.mbtn{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:16px 22px;border-radius:12px;border:1.5px solid rgba(255,255,255,.18);
+  background:rgba(10,10,12,.55);backdrop-filter:blur(6px);color:#fff;font-family:'Fredoka';font-weight:800;font-size:calc(18px*var(--fs));letter-spacing:2px;direction:ltr;transition:.2s}
+.mbtn small{font-family:'Baloo Bhaijaan 2','Fredoka';letter-spacing:0;font-size:calc(15px*var(--fs));color:#cfd3da}
+.mbtn:hover{border-color:var(--lime);box-shadow:0 0 24px rgba(34,211,238,.35);transform:translateX(-4px)}
+.mbtn.primary{background:var(--lime);color:#0b0d10;border-color:var(--lime)}.mbtn.primary small{color:#2a3300}
+.mbtn.hidden{display:none}
+
+/* القائمة الرئيسية (طفولية) */
+#menu{background:radial-gradient(900px 600px at 55% 40%,#1c2a86 0,transparent 65%),radial-gradient(700px 500px at 0% 100%,#2b1a74 0,transparent 60%),#0b1240;overflow:hidden}
+.sparkles span{position:absolute;color:#fff;opacity:.8;font-weight:700;animation:tw 2.5s infinite}
+.mtop{position:absolute;top:22px;left:26px;right:26px;display:flex;justify-content:space-between;align-items:center;direction:ltr;z-index:3}
+.ldot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 10px #22d3ee;margin-left:4px}
+.mhero{position:absolute;right:4%;top:20%;width:min(380px,29%);z-index:3}
+.hello{font-family:'Baloo Bhaijaan 2';font-weight:700;font-size:14px;color:#dfe7ff;display:flex;gap:10px;align-items:center}
+.hello span{background:#22d3ee;color:#06213a;border-radius:999px;padding:3px 14px;font-weight:800}
+.bigtitle{font-family:'Fredoka';font-weight:700;font-size:calc(78px*var(--fs));line-height:.95;color:#fff;margin:14px 0 18px;direction:ltr;text-align:right;text-shadow:0 6px 0 rgba(0,0,0,.18)}
+.bigtitle b{color:#22d3ee;font-weight:700;text-shadow:0 0 30px rgba(34,211,238,.6),0 6px 0 rgba(0,0,0,.18)}
+.pill{display:inline-block;background:#fff;color:#14204a;border-radius:999px;padding:6px 16px;font-weight:800;font-size:14px}
+.mlead{margin-top:14px;font-size:calc(19px*var(--fs));line-height:1.7;color:#eef2ff;font-weight:600}
+.artframe{position:absolute;left:46%;top:46%;transform:translate(-50%,-50%);width:min(500px,36%);aspect-ratio:1.37;border-radius:34px;overflow:hidden;border:5px solid #fff;
+  box-shadow:0 0 0 8px rgba(34,211,238,.35),0 0 60px rgba(34,211,238,.45),0 20px 50px rgba(0,0,0,.5);z-index:2;animation:frameb 6s ease-in-out infinite}
+@keyframes frameb{50%{transform:translate(-50%,calc(-50% - 8px))}}
+.artframe .burn{animation:kb 20s ease-in-out infinite alternate}
+.artlabel{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(11,18,64,.8);color:#fff;font-weight:800;font-size:14px;padding:5px 14px;border-radius:999px;white-space:nowrap}
+.rocket{position:absolute;left:62%;top:9%;z-index:3;animation:rock 4s ease-in-out infinite;transform:rotate(18deg)}
+@keyframes rock{50%{transform:rotate(18deg) translateY(-14px)}}
+.mcards{position:absolute;left:4%;top:26%;width:min(240px,20%);display:flex;flex-direction:column;gap:14px;z-index:3}
+.mcard{border-radius:22px;padding:14px 18px;border:2px solid rgba(255,255,255,.22);color:#fff;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.mcard small{display:block;font-size:13px;font-weight:700;opacity:.85}
+.mcard b{font-size:calc(22px*var(--fs));font-weight:800}
+.mcard.c1{background:linear-gradient(135deg,#4b3bb8,#6a4fd8)}.mcard.c2{background:linear-gradient(135deg,#a33b8f,#d457a8)}.mcard.c3{background:linear-gradient(135deg,#0f6c96,#1aa3c4)}
+.mgo{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:4}
+.gobtn{display:flex;align-items:center;gap:22px;padding:12px 14px 12px 34px;border-radius:999px;border:5px solid #fff;background:linear-gradient(180deg,#67ebff,#22d3ee);color:#06213a;
+  box-shadow:0 9px 0 #0e7f9a,0 18px 40px rgba(34,211,238,.45);transition:.15s;font-family:'Baloo Bhaijaan 2';font-weight:800;font-size:calc(34px*var(--fs));line-height:1}
+.gobtn small{display:block;font-size:14px;font-weight:700;opacity:.8;margin-bottom:4px}
+.gobtn i{font-style:normal;width:56px;height:56px;border-radius:50%;background:#0b1a4a;color:#22d3ee;display:flex;align-items:center;justify-content:center;font-size:24px}
+.gobtn:hover{transform:translateY(-3px);box-shadow:0 12px 0 #0e7f9a,0 22px 44px rgba(34,211,238,.55)}
+.gobtn:active{transform:translateY(6px);box-shadow:0 3px 0 #0e7f9a}
+.gohint{font-weight:800;font-size:14px;color:#cfe9ff}
+.mascot{position:absolute;left:3%;bottom:5%;z-index:3;animation:rock2 5s ease-in-out infinite}
+@keyframes rock2{50%{transform:translateY(-10px) rotate(-4deg)}}
+.mfoot{position:absolute;left:26px;right:26px;bottom:12px;display:flex;justify-content:space-between;font-family:'Fredoka';font-size:12px;letter-spacing:1px;color:#8f9bd6;direction:ltr;z-index:3}
+
+/* اختيار العمر والمساعد */
+.choices{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+.choice{width:250px;padding:26px 18px;border-radius:30px;border:2px solid var(--line);background:var(--panel);transition:.2s;color:var(--text)}
+.choice:hover{border-color:var(--lime);transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.choice .big{font-size:76px;line-height:1.1}
+.choice b{display:block;font-size:calc(22px*var(--fs));margin-top:8px}
+.choice span{color:var(--muted);font-size:calc(14px*var(--fs))}
+.namebox{display:flex;gap:10px;align-items:center;justify-content:center}
+.namebox input{padding:12px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel2);color:var(--text);font-size:calc(18px*var(--fs));width:220px;text-align:center}
+
+/* الشخصيات */
+.chars{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;width:min(1180px,96%)}
+.card{border-radius:26px;border:2px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));padding:14px 12px 16px;text-align:center;transition:.2s;color:var(--text);position:relative}
+.card:hover{transform:translateY(-4px)}
+.card.sel{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent),0 12px 34px rgba(0,0,0,.4)}
+.card .av{height:150px;display:flex;align-items:flex-end;justify-content:center;border-radius:14px;background:radial-gradient(circle at 50% 60%,color-mix(in srgb,var(--c) 35%,transparent),transparent 70%)}
+.card .av svg{height:150px}
+.card .nm{font-size:calc(19px*var(--fs));font-weight:800;margin-top:8px}
+.card .rl{font-family:'Fredoka';font-size:10px;letter-spacing:1.5px;color:var(--c)}
+.card .tr{font-size:calc(13px*var(--fs));color:var(--muted);margin-top:6px;min-height:40px}
+.card .ab{margin-top:8px;font-size:calc(13px*var(--fs));padding:6px 8px;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+.card .ds{position:absolute;top:10px;left:10px;font-size:9px;font-family:'Fredoka';letter-spacing:1px;padding:3px 6px;border-radius:5px;border:1px solid var(--c);color:var(--c)}
+
+/* المقدمة السينمائية */
+#cut .slide{position:absolute;inset:0;opacity:0;transition:opacity .8s}
+#cut .slide.on{opacity:1}
+.cutbar{position:absolute;left:0;right:0;bottom:0;padding:26px 7% 30px 420px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.92) 40%)}
+.cuttext{font-size:calc(26px*var(--fs));font-weight:800;color:#fff;min-height:84px;line-height:1.6;text-shadow:0 2px 12px #000}
+.cuttag{font-family:'Fredoka';font-size:12px;letter-spacing:3px;color:#ffb347;direction:ltr;text-align:right;margin-bottom:6px}
+.cutnav{display:flex;gap:10px;margin-top:10px}
+.sc-heat{background:radial-gradient(circle at 50% 30%,#ffde6b,#ff7a1a 18%,#b23a0a 40%,#3a0f05 75%)}
+.sc-heat .sun{position:absolute;left:50%;top:22%;width:200px;height:200px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#fff6c9,#ffc93c 50%,#ff7a1a);box-shadow:0 0 120px 40px rgba(255,140,30,.6);animation:pulse 3s infinite}
+@keyframes pulse{50%{box-shadow:0 0 160px 70px rgba(255,140,30,.75)}}
+.sc-heat .ice{position:absolute;bottom:22%;font-size:90px;animation:melt 6s forwards}
+@keyframes melt{to{transform:scaleY(.25) translateY(120px);opacity:.3}}
+.thermo{position:absolute;left:12%;top:18%;bottom:30%;width:46px;border-radius:30px;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.6);overflow:hidden}
+.thermo i{position:absolute;left:0;right:0;bottom:0;height:20%;background:linear-gradient(0deg,#ffcf40,#ff2d1a);animation:therm 5s forwards}
+@keyframes therm{to{height:95%}}
+.sc-dry{background:linear-gradient(180deg,#d9a35a,#a8692c 45%,#6b3d16)}
+.sc-dry .ground{position:absolute;left:0;right:0;bottom:0;height:45%;background:
+  repeating-linear-gradient(35deg,transparent 0 46px,rgba(40,20,5,.55) 46px 49px),repeating-linear-gradient(-55deg,transparent 0 60px,rgba(40,20,5,.5) 60px 63px),linear-gradient(180deg,#9a5f28,#5a3010)}
+.sc-dry .tree{position:absolute;bottom:38%;right:22%;font-size:150px;filter:grayscale(.6) sepia(.6)}
+.sc-dry .drop{position:absolute;bottom:40%;left:25%;font-size:70px;animation:drop 4s infinite}
+@keyframes drop{0%{opacity:1}100%{opacity:0;transform:scale(.3)}}
+.sc-call{background:radial-gradient(circle at 50% 40%,#13254f,#05070f 70%)}
+.callui{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ring{width:150px;height:150px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:62px;background:#0f1a33;border:3px solid var(--lime);animation:ringp 1.1s infinite}
+@keyframes ringp{0%{box-shadow:0 0 0 0 rgba(34,211,238,.6)}100%{box-shadow:0 0 0 40px rgba(34,211,238,0)}}
+.callui .who{font-family:'Fredoka';letter-spacing:3px;color:var(--lime);margin-top:18px;font-size:13px}
+.dialog{display:flex;gap:16px;align-items:flex-start;max-width:860px;margin:0 auto}
+.dialog svg{width:90px;height:90px;flex:none}
+
+/* المكوك (من فوق) */
+#ship{background:radial-gradient(circle at 50% 50%,#1a2470,#0a0f38 70%)}
+.light #ship{background:radial-gradient(circle at 50% 50%,#c9d3e3,#9aa7bb 80%)}
+.shipwrap{position:absolute;left:50%;top:50%;width:1000px;height:600px;transform-origin:center}
+.hull{position:absolute;inset:0;border-radius:60px 60px 140px 140px;background:var(--hull1);border:6px solid #6f7cf0;box-shadow:0 0 0 2px #0a0c10,0 30px 80px rgba(0,0,0,.6),inset 0 0 60px rgba(0,0,0,.35)}
+.floor{position:absolute;inset:16px;border-radius:48px 48px 128px 128px;background:
+  linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(0deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/40px 40px,var(--floor)}
+.room{position:absolute;border:3px solid rgba(139,92,246,.7);border-radius:26px;background:rgba(139,92,246,.10)}
+.room .rn{position:absolute;top:8px;right:12px;font-size:13px;font-weight:800;color:var(--muted)}
+.room .rn em{font-family:'Fredoka';font-style:normal;font-size:9px;letter-spacing:2px;display:block}
+.door{position:absolute;background:var(--floor)}
+.obj{position:absolute;border-radius:10px}
+.winstrip{position:absolute;top:-3px;height:22px;border-radius:0 0 30px 30px;background:linear-gradient(180deg,#0b1a40,#1d3c8a);border:3px solid #5a6676;overflow:hidden}
+.winstrip i{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%}
+.station{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.station .ic{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:#1a2468;border:3px solid #22d3ee;box-shadow:0 0 18px rgba(61,219,232,.25)}
+.station .lb{font-size:12px;font-weight:800;background:rgba(0,0,0,.55);color:#fff;padding:1px 8px;border-radius:12px;white-space:nowrap}
+.station.glow .ic{border-color:var(--lime);box-shadow:0 0 26px var(--lime);animation:bob 1.2s infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.npc{position:absolute;transform:translate(-50%,-80%);cursor:pointer}
+.npc svg{width:62px;height:62px}
+.player{position:absolute;transform:translate(-50%,-80%);z-index:5;pointer-events:none;transition:none}
+.player svg{width:74px;height:74px;filter:drop-shadow(0 8px 6px rgba(0,0,0,.5))}
+.player.walk svg{animation:walk .35s infinite}
+@keyframes walk{50%{transform:translateY(-4px) rotate(2deg)}}
+.player .shadow,.npc .shadow{position:absolute;bottom:-4px;left:50%;width:44px;height:12px;transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.35);z-index:-1}
+.bubble{position:absolute;transform:translate(-50%,-100%);background:#fff;color:#111;border-radius:14px;padding:8px 12px;font-size:14px;font-weight:700;max-width:260px;white-space:normal;box-shadow:0 8px 20px rgba(0,0,0,.35);z-index:8}
+.bubble:after{content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+.interact{position:absolute;transform:translate(-50%,-100%);z-index:9;padding:6px 14px;font-size:14px}
+.shipnote{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:13px;color:var(--muted);background:rgba(0,0,0,.35);padding:4px 14px;border-radius:20px}
+.joy{position:absolute;bottom:20px;right:20px;display:grid;grid-template-columns:repeat(3,52px);gap:6px;direction:ltr}
+.joy button{height:52px;border-radius:12px;border:1px solid var(--line);background:rgba(20,24,30,.75);color:#fff;font-size:22px}
+.joy button:active{background:var(--lime);color:#000}
+
+/* النافذة (اختيار الكوكب) */
+#obs{background:radial-gradient(circle at 50% 30%,#1d2770,#0b1240 75%)}
+.obswin{position:absolute;inset:18px 18px 100px 18px;border-radius:200px/90px;overflow:hidden;background:radial-gradient(ellipse at 30% 20%,#1b2550,#070a18 55%,#020309);border:12px solid #6f7cf0;box-shadow:inset 0 0 80px rgba(0,0,0,.9),0 0 0 4px #fff,0 0 40px rgba(34,211,238,.35)}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:tw 3s infinite}
+@keyframes tw{50%{opacity:.25}}
+.planet{position:absolute;border-radius:50%;border:none;transform:translate(-50%,-50%);animation:floaty 6s ease-in-out infinite;transition:filter .2s}
+.planet:hover{filter:brightness(1.25) drop-shadow(0 0 18px rgba(255,255,255,.35))}
+.planet.target{outline:3px dashed var(--lime);outline-offset:8px}
+@keyframes floaty{50%{transform:translate(-50%,calc(-50% - 10px))}}
+.planet .lbl{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:8px;white-space:nowrap;font-size:calc(13px*var(--fs));font-weight:700;color:#fff;background:rgba(0,0,0,.55);padding:2px 10px;border-radius:20px}
+.planet .done{position:absolute;top:-6px;right:-6px;background:var(--lime);color:#0b0d10;border-radius:50%;width:24px;height:24px;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.pring{position:absolute;left:50%;top:50%;width:190%;height:46%;transform:translate(-50%,-50%) rotate(-18deg);border-radius:50%;border:6px solid rgba(230,205,150,.75);pointer-events:none}
+.obsbar{position:absolute;left:18px;right:18px;bottom:16px;height:70px;border-radius:16px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 16px}
+.obsbar .msg{flex:1}
+
+/* النوافذ المنبثقة */
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.box{width:min(470px,92%);background:linear-gradient(180deg,var(--panel),var(--panel2));border:2px solid var(--line);border-radius:28px;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:pop .25s}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.box .en{font-family:'Fredoka';font-size:11px;letter-spacing:2px;color:var(--gold);direction:ltr;text-align:right}
+.box h2{font-size:calc(24px*var(--fs));margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;margin:6px 0;border-radius:16px;background:var(--panel2);border:1px solid var(--line)}
+.row .k{color:var(--muted);font-weight:600}.row .v{font-weight:800}
+.bar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;border-radius:6px}
+.fact{margin:12px 0;padding:10px 12px;border-radius:9px;background:rgba(34,211,238,.07);border:1px dashed rgba(34,211,238,.4);font-size:calc(15px*var(--fs))}
+.sci{font-size:calc(13px*var(--fs));color:var(--muted);margin-top:6px;direction:ltr;text-align:right;font-family:monospace}
+.actions{display:flex;gap:10px;margin-top:14px}.actions .btn{flex:1}
+.set{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);gap:10px}
+.toggle{width:52px;height:28px;border-radius:20px;background:var(--line);position:relative;border:none;transition:.2s;flex:none}
+.toggle:after{content:"";position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on{background:var(--lime)}.toggle.on:after{right:27px}
+.toggle:disabled{opacity:.4}
+.seg button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;font-weight:700}
+.seg button.on{border-color:var(--lime);color:var(--lime)}
+
+/* مرحلة الكوكب */
+#stage .sky{position:absolute;inset:0}
+#stage .ground{position:absolute;left:0;right:0;bottom:0;height:26%}
+#stage .clouds{position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.08) 0 30px,transparent 30px 70px);animation:drift 12s linear infinite}
+@keyframes drift{to{background-position:0 -700px}}
+.astro{position:absolute;left:28%;transition:bottom .1s linear;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.astro svg{width:110px;height:110px}
+.earthghost{position:absolute;left:18%;opacity:.3;filter:grayscale(1)}.earthghost svg{width:84px;height:84px}
+.marker{position:absolute;left:12%;right:52%;border-top:2px dashed rgba(255,255,255,.5);font-size:13px;color:#fff}
+.side{position:absolute;top:16px;right:16px;bottom:16px;width:min(390px,42%);background:linear-gradient(180deg,var(--panel),var(--panel2));border:2px solid var(--line);border-radius:28px;padding:18px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.side h2{font-size:calc(22px*var(--fs))}
+.task{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:16px;border:1px solid var(--line);background:var(--panel2);font-weight:700}
+.task.ok{border-color:var(--lime)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tools .btn{padding:10px 8px;font-size:calc(15px*var(--fs))}
+.log{flex:1;min-height:80px;background:#05070a;color:#bfe68a;border-radius:10px;padding:10px 12px;font-family:monospace;font-size:calc(14px*var(--fs));overflow:auto;line-height:1.8;border:1px solid var(--line)}
+.gauge{position:absolute;left:24px;top:24px;bottom:24px;width:34px;border-radius:20px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.3);overflow:hidden}
+.gauge i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#ffcf40,#ff4d1a);transition:height .2s}
+.gauge b{position:absolute;top:8px;left:0;right:0;text-align:center;color:#fff;font-size:11px;z-index:2;writing-mode:vertical-rl}
+.bigmsg{position:absolute;left:4%;top:38%;width:46%;text-align:center;font-size:calc(28px*var(--fs));font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.8)}
+.probe{position:absolute;left:30%;bottom:26%;font-size:64px}
+.report .check{padding:10px 12px;margin:6px 0;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.earth{margin-top:8px;padding:14px;border-radius:12px;background:linear-gradient(135deg,rgba(47,182,124,.18),rgba(61,219,232,.08));border:1px solid #2fb67c}
+.earth b{color:#2fb67c}
+
+/* المستعمرة */
+#colony{background:#0b0d10}
+.cgrid-wrap{position:absolute;top:84px;left:16px;right:380px;bottom:16px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.cground{position:absolute;inset:0}
+.cgrid{position:absolute;inset:18px;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(4,1fr);gap:10px}
+.tile{border-radius:20px;border:2px dashed rgba(255,255,255,.22);background:rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:40px;cursor:pointer;transition:.15s;position:relative}
+.tile:hover{border-color:var(--lime);background:rgba(34,211,238,.12)}
+.tile.built{border:2px solid rgba(255,255,255,.35);background:linear-gradient(180deg,rgba(30,36,46,.92),rgba(16,19,24,.92));cursor:default}
+.tile.new{animation:build .45s}
+.tile.built small{font-size:11px;font-weight:800;color:#fff;margin-top:2px}
+.tile.off{filter:grayscale(1) brightness(.6)}
+.tile.hit{animation:shake .5s}
+@keyframes build{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.colonist{position:absolute;font-size:20px;transition:left 2.5s linear,top 2.5s linear;pointer-events:none;z-index:3}
+.res{position:absolute;top:12px;left:16px;right:16px;height:60px;display:flex;gap:8px}
+.rc{flex:1;border-radius:18px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);padding:6px 10px;display:flex;flex-direction:column;justify-content:center}
+.rc .t{font-size:12px;color:var(--muted);font-weight:700}
+.rc .n{font-size:20px;font-weight:800;line-height:1.1}
+.rc .d{font-size:11px;font-weight:800}
+.rc.low{border-color:var(--red);box-shadow:0 0 12px rgba(255,77,94,.35)}
+.up{color:#2fb67c}.down{color:var(--red)}
+.cside{position:absolute;top:84px;right:16px;bottom:16px;width:350px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:2px solid var(--line);border-radius:28px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.cside h3{font-size:calc(17px*var(--fs))}
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mod{border:2px solid var(--line);background:var(--panel2);color:var(--text);border-radius:16px;padding:6px 6px;text-align:right;transition:.15s}
+.mod b{display:block;font-size:13px}.mod span{font-size:11px;color:var(--muted);display:block;line-height:1.35}
+.mod.sel{border-color:var(--lime);box-shadow:0 0 12px rgba(34,211,238,.35)}
+.mod:disabled{opacity:.4}
+.goal{padding:8px 10px;border-radius:10px;background:rgba(61,219,232,.08);border:1px solid rgba(61,219,232,.35);font-size:13px;font-weight:700}
+.hbar{height:10px;border-radius:6px;background:var(--line);overflow:hidden}.hbar i{display:block;height:100%;background:linear-gradient(90deg,#ff4d5e,#e8a33d,#2fb67c);transition:width .4s}
+.clog{flex:1;min-height:60px;overflow:auto;background:#05070a;border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.7;color:#cfe8b0;border:1px solid var(--line)}
+.ctrl{display:flex;gap:6px}.ctrl .btn{flex:1;padding:9px 6px;font-size:15px}
+.flash{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;transition:opacity .3s}
+
+/* النهاية */
+#finale{background:radial-gradient(circle at 50% 40%,#0e3b2a,#05110c 70%);text-align:center;overflow:auto}
+#finale .globe{width:200px;height:200px;border-radius:50%;margin:30px auto 16px;background:radial-gradient(circle at 35% 30%,#7fe0ff,#1f7fd1 45%,#0b3b7a 75%);box-shadow:0 0 60px rgba(61,219,232,.5);position:relative;overflow:hidden}
+#finale .globe:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 45%,#3fbf5a 0 14%,transparent 15%),radial-gradient(circle at 62% 30%,#3fbf5a 0 11%,transparent 12%),radial-gradient(circle at 58% 68%,#3fbf5a 0 16%,transparent 17%)}
+.headline{font-size:calc(38px*var(--fs));font-weight:800;color:#fff;line-height:1.5}
+.lead{color:#e6dcd4;font-size:calc(18px*var(--fs));line-height:1.9;max-width:760px;margin:0 auto}
+
+/* المساعد (البسة) */
+#helper{position:absolute;left:16px;bottom:16px;z-index:60;display:none;align-items:flex-end;gap:8px;direction:rtl;pointer-events:none}
+#helper.on{display:flex}
+#helper .cat{width:104px;height:104px;pointer-events:auto;cursor:pointer;animation:catbob 3s ease-in-out infinite;filter:drop-shadow(0 8px 12px rgba(0,0,0,.5))}
+@keyframes catbob{50%{transform:translateY(-6px)}}
+#helper .hb{pointer-events:auto;max-width:330px;background:#fff;color:#151515;border-radius:16px 16px 16px 4px;padding:10px 14px;font-weight:700;font-size:calc(15px*var(--fs));box-shadow:0 10px 30px rgba(0,0,0,.4);margin-bottom:60px;position:relative}
+#helper .hb.hide{display:none}
+#helper .hn{font-size:11px;color:#8a5a00;font-weight:800;margin-bottom:2px}
+#helper .hbtns{display:flex;gap:6px;margin-top:6px}
+#helper .hbtns button{border:none;background:#f0f0f0;border-radius:8px;padding:3px 9px;font-size:13px}
+.hint{box-shadow:0 0 0 4px rgba(255,210,63,.95),0 0 26px rgba(255,210,63,.8)!important;outline:3px solid #ffd23f;outline-offset:4px}
+@keyframes hintp{0%{box-shadow:0 0 0 0 rgba(255,210,63,.9)}100%{box-shadow:0 0 0 18px rgba(255,210,63,0)}}
+.paw{position:absolute;z-index:61;font-size:38px;pointer-events:none;animation:pawb .8s infinite;display:none}
+@keyframes pawb{50%{transform:translateY(-8px)}}
+</style>
+</head>
+<body>
+<div class="hud hide" id="hud">
+  <div class="logo"><div>BEYOND EARTH<small>LEARN · PLAY · EXPLORE</small></div></div>
+  <div class="right">
+    <span class="chip me" id="meChip"></span>
+    <span class="chip" id="progressChip">🔭 0/0</span>
+    <button class="iconbtn" id="themeBtn" title="ليلي / نهاري">🌙</button>
+    <button class="iconbtn" id="settingsBtn" title="الإعدادات">⚙️</button>
+  </div>
+</div>
+
+<!-- 1) القائمة الرئيسية -->
+<section class="screen full on" id="menu">
+  <div class="sparkles" id="sparkles"></div>
+  <div class="mtop">
+    <div class="logo"><div>BEYOND EARTH<small>LEARN · PLAY · EXPLORE</small></div></div>
+    <div style="display:flex;gap:12px;align-items:center"><span class="chip"><span class="ldot"></span> جاهز للعب!</span><button class="iconbtn" id="menuSetBtn" title="الإعدادات">⚙️</button></div>
+  </div>
+  <div class="mhero">
+    <div class="hello"><span>أهلًا!</span> نداء لكل المستكشفين</div>
+    <div class="bigtitle">BEYOND<br><b>EARTH</b></div>
+    <div class="pill">يلا نستكشف النجوم! ✨</div>
+    <p class="mlead">الأرض تحتاجك! انطلق للفضاء، وتعرّف على أصحاب جدد، وساعدنا نلقى بيت جديد للبشر 🚀</p>
+  </div>
+  <div class="artframe"><div class="burn" id="burnBg"></div><div class="burnfx" id="burnFx"></div><div class="artlabel">🌍 الأرض في المستقبل... إذا ما تحركنا</div></div>
+  <div class="rocket"><svg viewBox="0 0 80 120" width="74"><path d="M40 4c18 14 26 38 22 66H18C14 42 22 18 40 4z" fill="#fff" stroke="#6f4ad8" stroke-width="4"/><circle cx="40" cy="44" r="12" fill="#22d3ee" stroke="#6f4ad8" stroke-width="4"/><path d="M34 46q6 6 12 0" stroke="#06213a" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M18 70l-12 18 16-4zM62 70l12 18-16-4z" fill="#8b5cf6" stroke="#6f4ad8" stroke-width="3"/><path d="M28 84l4 26 8-14 8 14 4-26z" fill="#ff9f3d"/><path d="M33 84l3 14 4-8 4 8 3-14z" fill="#ffd23f"/></svg></div>
+  <div class="mcards">
+    <div class="mcard c1"><small>طاقمك</small><b>جاهز! 👩‍🚀</b></div>
+    <div class="mcard c2"><small>المستعمرات 🏠</small><b id="mcCol">0</b></div>
+    <div class="mcard c3"><small>المحطة الجاية</small><b id="mcNext">القمر 🌕</b></div>
+  </div>
+  <div class="mgo">
+    <button class="gobtn" id="newBtn"><span><small>جاهز يا مستكشف؟</small>يلا ننطلق!</span><i>❮</i></button>
+    <button class="btn" id="contBtn" style="display:none">⏯ كمّل لعبتك</button>
+    <div class="gohint">اضغط الزر الأزرق الكبير عشان تلعب 👆</div>
+  </div>
+  <div class="mascot"><svg viewBox="0 0 160 110" width="150"><ellipse cx="80" cy="62" rx="74" ry="20" fill="none" stroke="#22d3ee" stroke-width="12"/><circle cx="80" cy="52" r="40" fill="#8b5cf6" stroke="#fff" stroke-width="5"/><circle cx="66" cy="48" r="4.5" fill="#1b1040"/><circle cx="94" cy="48" r="4.5" fill="#1b1040"/><path d="M68 62q12 12 24 0" stroke="#1b1040" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="58" cy="60" r="6" fill="#ff8ac2" opacity=".7"/><circle cx="102" cy="60" r="6" fill="#ff8ac2" opacity=".7"/><path d="M6 62a74 20 0 0 0 148 0" fill="none" stroke="#22d3ee" stroke-width="12"/></svg></div>
+  <div class="mfoot"><span>GAME VERSION 1.0</span><span>🔊 شغّل الصوت عشان تستمتع أكثر</span><span>NASA SPACE APPS 2026</span></div>
+</section>
+
+<!-- 2) العمر -->
+<section class="screen full" id="age">
+  <div class="center">
+    <div class="title">كم عمرك يا بطل؟ 🎂</div>
+    <div class="choices">
+      <button class="choice" id="ageKid"><div class="big">🧒</div><b>أصغر من 10</b><span>بيكون معك مساعد يقرالك ويساعدك</span></button>
+      <button class="choice" id="ageBig"><div class="big">🧑‍🚀</div><b>10 أو أكبر</b><span>تقدر تختار إذا تبي مساعد</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- 3) المساعد -->
+<section class="screen full" id="help">
+  <div class="center">
+    <div id="helpCat" style="width:170px;height:170px"></div>
+    <div class="title" id="helpQ">تبي مساعد معك في المهمة؟</div>
+    <div class="sub">مساعدك يقرالك الكلام بصوت، ويأشر لك وين تضغط 🐾</div>
+    <div class="namebox"><span>سمّه:</span><input id="helperName" maxlength="14" value="مساعد"></div>
+    <div class="choices" id="helpChoices">
+      <button class="choice" id="helpYes" style="width:210px"><div class="big">✅</div><b>أيوه، أبيه</b></button>
+      <button class="choice" id="helpNo" style="width:210px"><div class="big">💪</div><b>لا، أقدر لحالي</b></button>
+    </div>
+    <button class="btn solid" id="helpGo" style="display:none">يلا نكمل ✨</button>
+  </div>
+</section>
+
+<!-- 4) الشخصيات -->
+<section class="screen full" id="chars">
+  <div class="center" style="gap:14px">
+    <div class="title">اختار رائد الفضاء حقك 👩‍🚀👨‍🚀</div>
+    <div class="sub">كل واحد عنده قدرة خاصة مربوطة بداتا حقيقية من ناسا</div>
+    <div class="chars" id="charGrid"></div>
+    <button class="btn solid" id="charGo" disabled>🚀 ابدأ المهمة</button>
+  </div>
+</section>
+
+<!-- 5) المقدمة السينمائية -->
+<section class="screen full" id="cut">
+  <div class="slide" data-i="0"><div class="burn" id="cutBurn"></div><div class="burnfx" id="cutFx"></div></div>
+  <div class="slide sc-heat" data-i="1"><div class="sun"></div><div class="thermo"><i></i></div><div class="ice" style="left:30%">🧊</div><div class="ice" style="left:60%;animation-delay:1s">🧊</div></div>
+  <div class="slide sc-dry" data-i="2"><div class="ground"></div><div class="tree">🥀</div><div class="drop">💧</div></div>
+  <div class="slide sc-call" data-i="3"><div class="callui" id="callUi"><div class="ring">📞</div><div class="who">INCOMING CALL · MISSION CONTROL</div></div></div>
+  <div class="cutbar">
+    <div class="cuttag" id="cutTag"></div>
+    <div id="cutDialog"></div>
+    <div class="cuttext" id="cutText"></div>
+    <div class="cutnav"><button class="btn solid" id="cutNext">التالي ⏭</button><button class="btn ghost" id="cutSkip">تخطي</button></div>
+  </div>
+</section>
+
+<!-- 6) المكوك -->
+<section class="screen" id="ship">
+  <div class="shipwrap" id="shipWrap">
+    <div class="hull"></div><div class="floor" id="floor"></div>
+    <div id="shipObjs"></div>
+    <div id="npcs"></div>
+    <div class="player" id="player"><div class="shadow"></div></div>
+    <div id="bubbles"></div>
+    <button class="btn solid interact" id="interactBtn" style="display:none">✋ تفاعل</button>
+  </div>
+  <div class="shipnote">🕹️ امشِ بالأسهم أو اضغط على الأرض · E أو المسافة للتفاعل</div>
+  <div class="joy" id="joy"><span></span><button data-d="up">▲</button><span></span><button data-d="left">◀</button><button data-d="act">✋</button><button data-d="right">▶</button><span></span><button data-d="down">▼</button><span></span></div>
+</section>
+
+<!-- 7) النافذة -->
+<section class="screen" id="obs">
+  <div class="obswin"><div id="stars" style="position:absolute;inset:0"></div><div id="planets"></div></div>
+  <div class="obsbar"><div class="msg" id="obsMsg">اضغط على أي كوكب عشان تشوف معلوماته 👆</div>
+    <button class="btn" id="finaleBtn" disabled>🌍 القرار الكبير</button><button class="btn ghost" id="obsBack">↩ رجوع للمكوك</button></div>
+</section>
+
+<!-- 8) مرحلة الكوكب -->
+<section class="screen" id="stage">
+  <div class="sky" id="sky"></div><div id="stageArt"></div>
+  <div class="side">
+    <div id="stEn" style="font-family:Fredoka;font-size:11px;letter-spacing:2px;color:var(--gold);direction:ltr;text-align:right"></div>
+    <h2 id="stTitle"></h2><div id="tasks"></div><div class="tools" id="tools"></div><div class="log" id="log"></div>
+    <div class="actions"><button class="btn ghost" id="backBtn">↩ رجوع للمكوك</button><button class="btn solid" id="reportBtn" disabled>✅ خلصت الدراسة</button></div>
+  </div>
+</section>
+
+<!-- 8b) المستعمرة -->
+<section class="screen" id="colony">
+  <div class="res" id="res"></div>
+  <div class="cgrid-wrap"><div class="cground" id="cground"></div><div class="cgrid" id="cgrid"></div><div id="colonists"></div><div class="flash" id="flash"></div></div>
+  <div class="cside">
+    <div id="cEn" style="font-family:Fredoka;font-size:11px;letter-spacing:2px;color:var(--gold);direction:ltr;text-align:right"></div>
+    <h3 id="cTitle"></h3>
+    <div class="goal" id="cGoal"></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800"><span>❤️ صحة الطاقم</span><span id="hTxt"></span></div><div class="hbar"><i id="hBar"></i></div></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:700">🏗️ اختار مبنى، وبعدين اضغط على مربع فاضي:</div>
+    <div class="mods" id="mods"></div>
+    <div class="clog" id="clog"></div>
+    <div class="ctrl"><button class="btn solid" id="cPlay">▶ شغّل الأيام</button><button class="btn" id="cStep">⏭ يوم</button><button class="btn ghost" id="cExit">↩</button></div>
+  </div>
+</section>
+
+<!-- 9) النهاية -->
+<section class="screen" id="finale">
+  <div class="globe"></div>
+  <div class="headline">وأنسب كوكب للعيش هو... <span style="color:#3ddbe8">الأرض</span> 🌍</div>
+  <div class="lead">درست كواكب كثيرة، وما لقيت ولا واحد فيه هواء نتنفسه وماء نشربه وجو يناسبنا مثل أرضنا.<br>وكل مهارة تعلمتها في الفضاء، هي نفسها اللي تنقذ الأرض.<br><b>إنت ما تدربت تهرب من الأرض... تدربت تنقذها 💚</b></div>
+  <div id="missionsDone" style="max-width:640px;margin:16px auto;text-align:right"></div>
+  <button class="btn solid" id="againBtn" style="margin-bottom:30px">🔄 العب من جديد</button>
+</section>
+
+<div class="modal" id="infoModal"><div class="box" id="infoBox"></div></div>
+<div class="modal" id="setModal"><div class="box">
+  <div class="en">SETTINGS</div><h2>⚙️ الإعدادات</h2>
+  <div class="set"><span>🌙 الوضع الليلي</span><button class="toggle" id="tDark"></button></div>
+  <div class="set"><span>🐱 المساعد <small id="helpLock" style="color:var(--muted)"></small></span><button class="toggle" id="tHelp"></button></div>
+  <div class="set"><span>🔊 المساعد يقرا بصوت</span><button class="toggle" id="tVoice"></button></div>
+  <div class="set"><span>🔠 حجم الخط</span><div class="seg" id="fsSeg"><button data-v="1">عادي</button><button data-v="1.15">كبير</button><button data-v="1.3">أكبر</button></div></div>
+  <div class="set"><span>✨ الحركات والمؤثرات</span><button class="toggle" id="tAnim"></button></div>
+  <div class="set"><span>🔬 أرقام ناسا للعلماء الصغار</span><button class="toggle" id="tSci"></button></div>
+  <div class="set"><span>🗑️ امسح التقدم</span><button class="btn ghost" id="resetBtn" style="padding:6px 14px">مسح</button></div>
+  <div class="actions"><button class="btn solid" id="setClose">تم</button></div>
+</div></div>
+
+<div id="helper"><div class="cat" id="catSvg"></div><div class="hb" id="hb"><div class="hn" id="hn"></div><div id="ht"></div>
+  <div class="hbtns"><button id="hSpeak">🔊 اسمع</button><button id="hHide">✕</button></div></div></div>
+<div class="paw" id="paw">🐾</div>
+
+<script>
+const DATA = __DATA__;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const LS={get(k,d){try{const v=localStorage.getItem('jat2_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('jat2_'+k,JSON.stringify(v))}catch(e){}}};
+const S={dark:LS.get('dark',true),fs:LS.get('fs',1),anim:LS.get('anim',true),sci:LS.get('sci',false),voice:LS.get('voice',true),
+  done:LS.get('done',{}),colonies:LS.get('colonies',{}),profile:LS.get('profile',null),target:LS.get('target',null)};
+function save(){['dark','fs','anim','sci','voice','done','colonies','profile','target'].forEach(k=>LS.set(k,S[k]))}
+
+/* =================== رسم الشخصيات (SVG) =================== */
+const CHARS=[
+ {id:'noura',name:'د. نورة',role:'PLANETARY SCIENTIST',ar:'عالمة كواكب',c:'#9b6bff',skin:'#f1c7a3',hijab:'#2b2f6b',suit:'#f4f6fb',badge:'🔭',
+  trait:'فضولية وتسأل عن كل شي!',ability:'🔭 تشوف معلومات زيادة عن الكواكب',ds:'EXOPLANET ARCHIVE',
+  line:'الكواكب اللي تشبه الأرض كثيرة، بس الشبه بالحجم مو كل شي! لازم نفحص الهواء والماء 🔭'},
+ {id:'faisal',name:'الكابتن فيصل',role:'MISSION COMMANDER',ar:'قائد المكوك',c:'#e8a33d',skin:'#d9a77c',hair:'#1b1b1b',beard:true,suit:'#f4f6fb',badge:'✈️',
+  trait:'شجاع وهادي في الأزمات',ability:'☀️ يحس بالعواصف الشمسية قبل الكل',ds:'NASA DONKI',line:null},
+ {id:'reem',name:'م. ريم',role:'SPACE ENGINEER',ar:'مهندسة فضاء',c:'#ff8a3d',skin:'#e8b48f',hijab:'#5b6472',suit:'#ffb070',badge:'🔧',
+  trait:'ذكية وتصلّح أي شي',ability:'🛡️ تبني دروع ضد الإشعاع',ds:'RADLAB · ISS',
+  line:'في محطة الفضاء الدولية يقيسون الإشعاع كل لحظة، وأنا أستخدم هالأرقام عشان أبني دروع المكوك 🔧'},
+ {id:'salman',name:'د. سلمان',role:'FLIGHT DOCTOR',ar:'طبيب الطاقم',c:'#ff4d5e',skin:'#c98d64',hair:'#2a1a10',glasses:true,suit:'#f4f6fb',badge:'🩺',
+  trait:'حنون ويحب يضحّك الطاقم',ability:'🦴 يراقب صحة العظام والعضلات',ds:'NASA OSDR',
+  line:'في الفضاء العظام والعضلات تضعف إذا ما تمرنت! ناسا سوت دراسات كثيرة عن هالشي 🩺 لا تنسى تتمرن!'},
+ {id:'lina',name:'لينا',role:'SPACE BOTANIST',ar:'مزارعة فضاء',c:'#2fb67c',skin:'#f3cfae',hijab:'#e86aa0',suit:'#9be3b8',badge:'🌱',
+  trait:'مرحة وتكلم النباتات 😄',ability:'🥬 تزرع أكل في أي مكان',ds:'CSA · FOOD',
+  line:'رواد محطة الفضاء زرعوا خس وأكلوه فعلًا! وأنا بزرع أكل لمستعمرتنا الجديدة 🌱'},
+];
+const CH=Object.fromEntries(CHARS.map(c=>[c.id,c]));
+function avatar(c){
+  const sk=c.skin, s=c.suit, a=c.c;
+  const head = c.hijab
+    ? `<path d="M60 30c-19 0-31 14-31 32 0 10 4 19 10 25h42c6-6 10-15 10-25 0-18-12-32-31-32z" fill="${c.hijab}"/>
+       <ellipse cx="60" cy="62" rx="19" ry="21" fill="${sk}"/>`
+    : `<ellipse cx="60" cy="62" rx="20" ry="22" fill="${sk}"/>
+       <path d="M40 58c0-16 9-24 20-24s20 8 20 24c-4-8-10-11-20-11s-16 3-20 11z" fill="${c.hair}"/>
+       ${c.beard?`<path d="M44 66c2 12 8 18 16 18s14-6 16-18c-3 6-9 8-16 8s-13-2-16-8z" fill="${c.hair}" opacity=".85"/>`:''}`;
+  return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+   <defs><radialGradient id="g${c.id}" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#bfe3ff" stop-opacity=".18"/><stop offset="1" stop-color="#7fb2ff" stop-opacity=".1"/></radialGradient>
+   <linearGradient id="s${c.id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${s}"/><stop offset="1" stop-color="#c4ccd8"/></linearGradient></defs>
+   <rect x="22" y="92" width="76" height="52" rx="22" fill="#9aa4b2"/>
+   <path d="M30 100c0-8 8-14 18-14h24c10 0 18 6 18 14v40H30z" fill="url(#s${c.id})" stroke="#7d8796" stroke-width="2"/>
+   <rect x="36" y="104" width="48" height="10" rx="5" fill="${a}"/>
+   <circle cx="78" cy="126" r="9" fill="#fff" stroke="${a}" stroke-width="3"/><text x="78" y="130.5" font-size="11" text-anchor="middle">${c.badge}</text>
+   <rect x="40" y="120" width="22" height="14" rx="3" fill="#2a3240"/><rect x="43" y="123" width="6" height="3" fill="#3ddbe8"/><rect x="51" y="123" width="8" height="3" fill="#22d3ee"/><rect x="43" y="128" width="16" height="2" fill="#5a6577"/>
+   <circle cx="60" cy="58" r="38" fill="#e9eef5" stroke="#9aa4b2" stroke-width="3"/>
+   <circle cx="60" cy="60" r="31" fill="#0f1a2e"/>
+   ${head}
+   <ellipse cx="52" cy="62" rx="2.6" ry="3.2" fill="#1b1b1b"/><ellipse cx="68" cy="62" rx="2.6" ry="3.2" fill="#1b1b1b"/>
+   <circle cx="53" cy="61" r=".9" fill="#fff"/><circle cx="69" cy="61" r=".9" fill="#fff"/>
+   ${c.glasses?`<g fill="none" stroke="#222" stroke-width="1.6"><circle cx="52" cy="62" r="6"/><circle cx="68" cy="62" r="6"/><path d="M58 62h4"/></g>`:''}
+   <circle cx="47" cy="70" r="3.2" fill="#ff8a8a" opacity=".45"/><circle cx="73" cy="70" r="3.2" fill="#ff8a8a" opacity=".45"/>
+   <path d="M54 73q6 5 12 0" fill="none" stroke="#7a3b2b" stroke-width="2" stroke-linecap="round"/>
+   <circle cx="60" cy="60" r="31" fill="url(#g${c.id})"/>
+   <path d="M38 44q8-12 22-14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+   <rect x="54" y="18" width="12" height="6" rx="3" fill="${a}"/>
+  </svg>`;
+}
+function catSVG(){
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+   <defs><radialGradient id="cg" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#cfe9ff" stop-opacity=".15"/><stop offset="1" stop-color="#8fbaff" stop-opacity=".12"/></radialGradient></defs>
+   <ellipse cx="60" cy="104" rx="34" ry="14" fill="#e9eef5" stroke="#9aa4b2" stroke-width="2"/>
+   <rect x="44" y="96" width="32" height="8" rx="4" fill="#22d3ee"/>
+   <path d="M34 50l6-26 16 16zM86 50l-6-26-16 16z" fill="#f2a043" stroke="#c97a22" stroke-width="2"/>
+   <path d="M38 46l4-15 9 9zM82 46l-4-15-9 9z" fill="#ffc6c6"/>
+   <ellipse cx="60" cy="62" rx="30" ry="27" fill="#f6b25a" stroke="#c97a22" stroke-width="2"/>
+   <path d="M60 37c-4 6-4 10 0 14 4-4 4-8 0-14z" fill="#d98a2e"/><path d="M33 58c6 0 9 2 11 4M33 66c6-1 9 0 11 1M87 58c-6 0-9 2-11 4M87 66c-6-1-9 0-11 1" stroke="#7a4a14" stroke-width="1.6" fill="none"/>
+   <ellipse cx="49" cy="60" rx="5" ry="6.5" fill="#1d2b1d"/><ellipse cx="71" cy="60" rx="5" ry="6.5" fill="#1d2b1d"/>
+   <circle cx="50.5" cy="57.5" r="1.8" fill="#fff"/><circle cx="72.5" cy="57.5" r="1.8" fill="#fff"/>
+   <path d="M57 69l3 3 3-3z" fill="#ff7a8a"/><path d="M60 72q-4 6-9 3M60 72q4 6 9 3" fill="none" stroke="#7a4a14" stroke-width="1.8" stroke-linecap="round"/>
+   <circle cx="44" cy="70" r="4" fill="#ff9b9b" opacity=".5"/><circle cx="76" cy="70" r="4" fill="#ff9b9b" opacity=".5"/>
+   <circle cx="60" cy="58" r="47" fill="url(#cg)" stroke="#b9c6d6" stroke-width="3"/>
+   <path d="M30 34q10-14 26-17" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+  </svg>`;
+}
+
+/* =================== المساعد =================== */
+const H={name:'مساعد', idle:null, last:'', target:null};
+function helperOn(){return S.profile && S.profile.helper}
+function say(text, targetSel){
+  H.last=text; clearHint();
+  if(!helperOn()) return;
+  $('#helper').classList.add('on'); $('#hb').classList.remove('hide');
+  $('#hn').textContent='🐾 '+(S.profile.helperName||'مساعد'); $('#ht').textContent=text;
+  speak(text);
+  H.target=targetSel||null;
+  clearTimeout(H.idle);
+  clearTimeout(H.ht); if(targetSel){ H.idle=setTimeout(()=>{ showHint(targetSel); speak(text); },9000); H.ht=setTimeout(()=>showHint(targetSel),2500); }
+}
+function speak(t){
+  if(!S.voice||!helperOn()||!('speechSynthesis' in window)) return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu,''));u.lang='ar-SA';u.rate=.95;
+    const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith('ar')); if(v) u.voice=v; speechSynthesis.speak(u)}catch(e){}
+}
+function showHint(sel){ const el=document.querySelector(sel); if(!el||!helperOn()) return; clearHint(); el.classList.add('hint');
+  const r=el.getBoundingClientRect(); const p=$('#paw'); p.style.display='block'; p.style.left=(r.left+r.width/2-18)+'px'; p.style.top=(r.bottom-6)+'px'; }
+function clearHint(){ $$('.hint').forEach(e=>e.classList.remove('hint')); $('#paw').style.display='none'; }
+$('#hSpeak').onclick=()=>speak(H.last);
+$('#hHide').onclick=()=>$('#hb').classList.add('hide');
+$('#catSvg').onclick=()=>{ $('#hb').classList.remove('hide'); speak(H.last); if(H.target) showHint(H.target); };
+document.addEventListener('click',e=>{ if(e.target.closest('.hint')) clearHint(); },true);
+
+/* =================== الإعدادات =================== */
+function applySettings(){
+  document.body.classList.toggle('light',!S.dark); document.body.classList.toggle('noanim',!S.anim);
+  document.documentElement.style.setProperty('--fs',S.fs);
+  $('#themeBtn').textContent=S.dark?'🌙':'☀️';
+  $('#tDark').classList.toggle('on',S.dark);$('#tAnim').classList.toggle('on',S.anim);$('#tSci').classList.toggle('on',S.sci);$('#tVoice').classList.toggle('on',S.voice);
+  const kid=S.profile&&S.profile.age==='kid';
+  $('#tHelp').classList.toggle('on',!!helperOn()); $('#tHelp').disabled=kid||!S.profile; $('#helpLock').textContent=kid?'(إجباري تحت 10 سنين)':'';
+  $$('#fsSeg button').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.v)===S.fs));
+  if(!helperOn()){$('#helper').classList.remove('on');clearHint()}
+  if(S.profile&&S.profile.char){const c=CH[S.profile.char];$('#meChip').innerHTML=avatar(c)+c.name}
+  save();
+}
+$('#themeBtn').onclick=()=>{S.dark=!S.dark;applySettings()};
+$('#settingsBtn').onclick=$('#menuSetBtn').onclick=()=>$('#setModal').classList.add('on');
+$('#setClose').onclick=()=>$('#setModal').classList.remove('on');
+$('#tDark').onclick=()=>{S.dark=!S.dark;applySettings()};
+$('#tAnim').onclick=()=>{S.anim=!S.anim;applySettings()};
+$('#tSci').onclick=()=>{S.sci=!S.sci;applySettings()};
+$('#tVoice').onclick=()=>{S.voice=!S.voice;applySettings()};
+$('#tHelp').onclick=()=>{if(!S.profile||S.profile.age==='kid')return;S.profile.helper=!S.profile.helper;applySettings();if(helperOn())say(H.last||'رجعت! أنا هنا أساعدك 🐾')};
+$$('#fsSeg button').forEach(b=>b.onclick=()=>{S.fs=parseFloat(b.dataset.v);applySettings()});
+$('#resetBtn').onclick=()=>{S.done={};S.colonies={};S.profile=null;S.target=null;applySettings();$('#setModal').classList.remove('on');go('menu')};
+$$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
+
+/* =================== التنقل =================== */
+let shipActive=false;
+function go(id){
+  $$('.screen').forEach(s=>s.classList.toggle('on',s.id===id));
+  $('#hud').classList.toggle('hide',['menu','age','help','chars','cut'].includes(id)); if(id!=='colony') stopColony();
+  shipActive = id==='ship'; clearHint();
+  if(id==='menu'){ $('#contBtn').style.display=(S.profile&&S.profile.char)?'inline-block':'none'; $('#helper').classList.remove('on'); $('#mcCol').textContent=Object.keys(S.colonies||{}).length; $('#mcNext').textContent=S.target&&byId[S.target]?realName(byId[S.target]).replace(/\s*\(.*\)/,''):'القمر 🌕'; }
+  if(id==='ship') enterShip();
+  if(id==='obs') renderObs();
+  updateProgress();
+}
+function updateProgress(){$('#progressChip').textContent=`🔭 ${Object.keys(S.done).length}/${DATA.planets.length}`}
+
+/* =================== الخلفية المحترقة =================== */
+function burnFx(el,n){
+  let h=[[5,14,2],[28,18,9],[52,12,4],[75,16,11],[90,13,6]].map(([x,d,dl])=>`<div class="smoke" style="left:${x}%;animation-duration:${d}s;animation-delay:-${dl}s"></div>`).join('')+'<div class="heat"></div>';
+  for(let i=0;i<n;i++) h+=`<span class="ember" style="left:${(Math.random()*96+2).toFixed(1)}%;--dx:${Math.round(Math.random()*160-80)}px;animation-duration:${(4+Math.random()*5).toFixed(1)}s;animation-delay:-${(Math.random()*9).toFixed(1)}s"></span>`;
+  el.innerHTML=h;
+}
+if(DATA.bg){$('#burnBg').style.backgroundImage=`url(${DATA.bg})`;$('#cutBurn').style.backgroundImage=`url(${DATA.bg})`}
+burnFx($('#burnFx'),25); burnFx($('#cutFx'),40);
+(function(){let s='';for(let i=0;i<22;i++)s+=`<span style="left:${Math.random()*100}%;top:${Math.random()*100}%;font-size:${10+Math.random()*16}px;animation-delay:-${(Math.random()*2.5).toFixed(1)}s">${Math.random()<.5?'+':'•'}</span>`;$('#sparkles').innerHTML=s})();
+
+/* =================== 1) القائمة =================== */
+$('#newBtn').onclick=()=>{S.done={};S.colonies={};S.target=null;S.profile={age:null,helper:false,helperName:'مساعد',char:null};go('age')};
+$('#contBtn').onclick=()=>go('ship');
+
+/* =================== 2) العمر + 3) المساعد =================== */
+$('#helpCat').innerHTML=catSVG(); $('#catSvg').innerHTML=catSVG();
+$('#ageKid').onclick=()=>{S.profile.age='kid';S.profile.helper=true;
+  $('#helpQ').textContent='هذا مساعدك في المهمة! 🐱'; $('#helpChoices').style.display='none'; $('#helpGo').style.display='inline-block'; go('help');
+  say('هلا! أنا مساعدك. تقدر تعطيني اسم، وبعدين اضغط الزر الأخضر','#helpGo');};
+$('#ageBig').onclick=()=>{S.profile.age='big';$('#helpQ').textContent='تبي مساعد معك في المهمة؟';$('#helpChoices').style.display='flex';$('#helpGo').style.display='none';go('help')};
+function setHelperName(){const v=$('#helperName').value.trim();S.profile.helperName=v||'مساعد'}
+$('#helpYes').onclick=()=>{setHelperName();S.profile.helper=true;applySettings();toChars()};
+$('#helpNo').onclick=()=>{setHelperName();S.profile.helper=false;applySettings();toChars()};
+$('#helpGo').onclick=()=>{setHelperName();applySettings();toChars()};
+
+/* =================== 4) الشخصيات =================== */
+function toChars(){
+  $('#charGrid').innerHTML=CHARS.map(c=>`<button class="card" data-id="${c.id}" style="--c:${c.c}"><span class="ds">${c.ds}</span>
+    <div class="av">${avatar(c)}</div><div class="nm">${c.name}</div><div class="rl">${c.role}</div><div class="tr">${c.trait}</div><div class="ab">${c.ability}</div></button>`).join('');
+  $$('.card').forEach(b=>b.onclick=()=>{$$('.card').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');S.profile.char=b.dataset.id;$('#charGo').disabled=false;
+    const c=CH[b.dataset.id]; say(`اخترت ${c.name}، ${c.ar}! اضغط ابدأ المهمة`,'#charGo')});
+  go('chars'); say('اختار رائد الفضاء اللي يعجبك! اضغط على صورته','#charGrid .card');
+}
+$('#charGo').onclick=()=>{applySettings();startCut()};
+
+/* =================== 5) المقدمة السينمائية =================== */
+let cutI=0, typeT=null;
+function cutSlides(){
+  const c=CH[S.profile.char];
+  return [
+   {tag:'EARTH · 2526',t:'الأرض... بعد مئات السنين. الدخان غطى السما، والمدن صارت حطام 🏭'},
+   {tag:'TEMPERATURE · CRITICAL',t:'الحرارة صارت ترتفع كل سنة، والجليد في القطبين ذاب 🌡️🧊'},
+   {tag:'WATER · RUNNING OUT',t:'الماء قل، والزرع يبس، والناس صاروا يدورون على أمل 💧'},
+   {tag:'INCOMING CALL · MISSION CONTROL',t:`📞 "هنا مركز التحكم... يا ${c.name}! نحتاجك. مهمتك تطلع برا الأرض، وتدرس الكواكب، وتلقى مكان نبني فيه قاعدة للبشر. المكوك جاهز!"`,call:true},
+  ];
+}
+function startCut(){cutI=0;go('cut');showCut()}
+function showCut(){
+  const sl=cutSlides(), s=sl[cutI];
+  $$('#cut .slide').forEach(x=>x.classList.toggle('on',+x.dataset.i===cutI));
+  // نعيد تشغيل الحركات
+  const cur=$(`#cut .slide[data-i="${cutI}"]`); cur.querySelectorAll('.ice,.thermo i').forEach(e=>{e.style.animation='none';e.offsetHeight;e.style.animation=''});
+  $('#cutTag').textContent=s.tag;
+  $('#cutDialog').innerHTML = s.call ? `<div class="dialog">${avatar(CH[S.profile.char])}</div>` : '';
+  $('#callUi').style.display = s.call ? 'block':'none';
+  $('#cutNext').textContent = cutI===sl.length-1 ? '🚀 اقبل المهمة واركب المكوك' : 'التالي ⏭';
+  clearInterval(typeT); let i=0; $('#cutText').textContent='';
+  typeT=setInterval(()=>{i++;$('#cutText').textContent=s.t.slice(0,i);if(i>=s.t.length)clearInterval(typeT)},28);
+  say(s.t.replace(/[“”"]/g,''),'#cutNext');
+}
+$('#cutNext').onclick=()=>{const n=cutSlides().length; if(cutI<n-1){cutI++;showCut()}else{go('ship')}};
+$('#cutSkip').onclick=()=>go('ship');
+
+/* =================== 6) المكوك من فوق =================== */
+const W=1000,Hh=600;
+const ROOMS=[
+  {id:'obsr',x:330,y:30,w:340,h:150,name:'غرفة النافذة',en:'OBSERVATION'},
+  {id:'cmd',x:40,y:200,w:260,h:220,name:'غرفة القيادة',en:'COMMAND'},
+  {id:'crew',x:700,y:200,w:260,h:220,name:'غرفة الطاقم',en:'CREW QUARTERS'},
+  {id:'air',x:400,y:450,w:200,h:120,name:'باب الخروج',en:'AIRLOCK'},
+];
+const OBST=[]; // الطاولة شكل بس، الطفل يقدر يمشي حواليها بحرية
+const STATIONS=[
+  {id:'window',x:500,y:95,icon:'🪟',lb:'النافذة: اختار كوكب'},
+  {id:'console',x:150,y:300,icon:'🖥️',lb:'شاشة ناسا'},
+  {id:'airlock',x:500,y:520,icon:'🚪',lb:'انزل للكوكب'},
+  {id:'table',x:500,y:305,icon:'🗺️',lb:'خريطة المهمة'},
+];
+const P={x:500,y:400,tx:null,ty:null,keys:{},face:1};
+let npcs=[], loopId=null, near=null;
+function buildShip(){
+  let h='';
+  ROOMS.forEach(r=>{h+=`<div class="room" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px"><div class="rn">${r.name}<em>${r.en}</em></div></div>`});
+  // أبواب (فتحات)
+  h+=`<div class="door" style="left:460px;top:170px;width:80px;height:16px"></div><div class="door" style="left:290px;top:280px;width:16px;height:80px"></div>
+      <div class="door" style="left:694px;top:280px;width:16px;height:80px"></div><div class="door" style="left:460px;top:444px;width:80px;height:16px"></div>`;
+  let st=''; for(let i=0;i<40;i++) st+=`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%"></i>`;
+  h+=`<div class="winstrip" style="left:350px;width:300px">${st}</div>`;
+  h+=`<div class="obj" style="left:440px;top:270px;width:120px;height:70px;background:#2b323d;border:2px solid #4a5463"></div>`;
+  h+=`<div class="obj" style="left:60px;top:250px;width:30px;height:120px;background:#232a34;border:2px solid #3e4756"></div>`;
+  h+=`<div class="obj" style="left:910px;top:240px;width:36px;height:70px;background:#30394a;border:2px solid #475265"></div><div class="obj" style="left:910px;top:330px;width:36px;height:70px;background:#30394a;border:2px solid #475265"></div>`;
+  h+=STATIONS.map(s=>`<div class="station" id="st_${s.id}" data-id="${s.id}" style="left:${s.x}px;top:${s.y}px"><div class="ic">${s.icon}</div><div class="lb">${s.lb}</div></div>`).join('');
+  $('#shipObjs').innerHTML=h;
+  $$('.station').forEach(e=>e.onclick=ev=>{ev.stopPropagation();const s=STATIONS.find(x=>x.id===e.dataset.id);walkTo(s.x,s.y+50)});
+}
+function buildNpcs(){
+  const others=CHARS.filter(c=>c.id!==S.profile.char); const pos=[[760,270],[860,280],[770,380],[850,390]];
+  npcs=others.map((c,i)=>({c,x:pos[i][0],y:pos[i][1]}));
+  $('#npcs').innerHTML=npcs.map((n,i)=>`<div class="npc" data-i="${i}" style="left:${n.x}px;top:${n.y}px;z-index:${n.y}"><div class="shadow"></div>${avatar(n.c)}</div>`).join('');
+  $$('.npc').forEach(e=>e.onclick=ev=>{ev.stopPropagation();const n=npcs[+e.dataset.i];walkTo(n.x-40,n.y+30)});
+}
+function fitShip(){const el=$('#ship');if(!el.classList.contains('on'))return;const sc=Math.min(el.clientWidth/1060,el.clientHeight/660);$('#shipWrap').style.transform=`translate(-50%,-50%) scale(${sc})`}
+window.addEventListener('resize',fitShip);
+function enterShip(){
+  buildShip(); buildNpcs(); $('#player').innerHTML='<div class="shadow"></div>'+avatar(CH[S.profile.char]);
+  fitShip(); drawPlayer();
+  if(!loopId) loopId=requestAnimationFrame(loop);
+  if(S.target && !S.done[S.target]){ glow('airlock'); say(`ممتاز! اخترت ${realName(byId[S.target])}. روح لباب الخروج تحت عشان تنزل 🚪`,'#st_airlock .ic'); }
+  else { glow('window'); say(Object.keys(S.done).length? 'رجعنا للمكوك! روح للنافذة واختار كوكب ثاني 🪟' : 'هذا المكوك! امشِ بالأسهم أو اضغط على الأرض. روح للنافذة فوق عشان تشوف الكواكب 🪟','#st_window .ic'); }
+}
+function glow(id){$$('.station').forEach(s=>s.classList.toggle('glow',s.dataset.id===id))}
+$('#shipWrap').addEventListener('click',e=>{if(e.target.closest('.station,.npc,.interact'))return;const r=$('#shipWrap').getBoundingClientRect();const sc=r.width/W;walkTo((e.clientX-r.left)/sc,(e.clientY-r.top)/sc)});
+function walkTo(x,y){P.tx=x;P.ty=y}
+document.addEventListener('keydown',e=>{if(!shipActive)return;const k=e.key.toLowerCase();
+  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){P.keys[k]=true;P.tx=null;e.preventDefault()}
+  if((k==='e'||k===' '||k==='enter')&&near){e.preventDefault();interact()}});
+document.addEventListener('keyup',e=>{P.keys[e.key.toLowerCase()]=false});
+$$('#joy button').forEach(b=>{const d=b.dataset.d,map={up:'arrowup',down:'arrowdown',left:'arrowleft',right:'arrowright'};
+  if(d==='act'){b.onclick=()=>{if(near)interact()};return}
+  const on=e=>{e.preventDefault();P.keys[map[d]]=true;P.tx=null},off=()=>P.keys[map[d]]=false;
+  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off)});
+function blocked(x,y){
+  if(x<50||x>950||y<55||y>575) return true;
+  if(y>470 && (x<330||x>670)) return true; // ذيل المكوك
+  return OBST.some(o=>x>o.x-20&&x<o.x+o.w+20&&y>o.y-10&&y<o.y+o.h+30);
+}
+function loop(){
+  loopId=requestAnimationFrame(loop); if(!shipActive) return;
+  let dx=0,dy=0;const k=P.keys,sp=3.6;
+  if(k.arrowup||k.w)dy-=1;if(k.arrowdown||k.s)dy+=1;if(k.arrowleft||k.a)dx-=1;if(k.arrowright||k.d)dx+=1;
+  if(!dx&&!dy&&P.tx!==null){const ddx=P.tx-P.x,ddy=P.ty-P.y,dist=Math.hypot(ddx,ddy);if(dist<4){P.tx=null}else{dx=ddx/dist;dy=ddy/dist}}
+  const len=Math.hypot(dx,dy);
+  if(len){dx/=len;dy/=len;const nx=P.x+dx*sp,ny=P.y+dy*sp;
+    if(!blocked(nx,P.y))P.x=nx; else if(P.tx!==null&&Math.abs(dx)>.1){}
+    if(!blocked(P.x,ny))P.y=ny;
+    if(blocked(nx,P.y)&&blocked(P.x,ny))P.tx=null;
+    if(dx)P.face=dx>0?1:-1; $('#player').classList.add('walk')} else $('#player').classList.remove('walk');
+  drawPlayer(); checkNear();
+}
+function drawPlayer(){const p=$('#player');p.style.left=P.x+'px';p.style.top=P.y+'px';p.style.zIndex=Math.round(P.y)}
+function checkNear(){
+  let best=null,bd=80;
+  STATIONS.forEach(s=>{const d=Math.hypot(s.x-P.x,s.y+40-P.y);if(d<bd){bd=d;best={type:'st',s}}});
+  npcs.forEach((n,i)=>{const d=Math.hypot(n.x-P.x,n.y-P.y);if(d<bd){bd=d;best={type:'npc',n,i}}});
+  const changed=(near&&best)?(near.type!==best.type||(near.s&&best.s&&near.s.id!==best.s.id)||(near.i!==best.i)):near!==best;
+  near=best; const b=$('#interactBtn');
+  if(near){b.style.display='block';const x=near.s?near.s.x:near.n.x,y=near.s?near.s.y-40:near.n.y-70;b.style.left=x+'px';b.style.top=y+'px';
+    b.textContent=near.s?({window:'🪟 طل من النافذة',console:'🖥️ شوف شاشة ناسا',airlock:'🚪 انزل للكوكب',table:'🗺️ شوف الخريطة'})[near.s.id]:`💬 كلم ${near.n.c.name}`;
+    if(changed&&helperOn()&&near.s&&near.s.id==='window') showHint('#interactBtn');}
+  else{b.style.display='none'}
+}
+$('#interactBtn').onclick=e=>{e.stopPropagation();interact()};
+function npcBubble(x,y,t){const b=document.createElement('div');b.className='bubble';b.style.left=x+'px';b.style.top=(y-125)+'px';b.textContent=t;$('#bubbles').innerHTML='';$('#bubbles').appendChild(b);setTimeout(()=>b.remove(),6500)}
+function interact(){
+  if(!near) return; clearHint();
+  if(near.type==='npc'){const c=near.n.c;let t=c.line;
+    if(c.id==='faisal'){const a=DATA.alert;t=a&&a.level==='X'?`ناسا رصدت انفجار شمسي قوي جدًا (${a.class}) هالأسبوع! لازم ننتبه للإشعاع ☀️`:a&&a.level==='M'?`ناسا رصدت ${a.count} انفجارات شمسية متوسطة هالأسبوع. أنا أراقب الشمس طول الوقت ☀️`:'الشمس هادية هالأسبوع حسب داتا ناسا، وقت ممتاز للرحلة ☀️'}
+    npcBubble(near.n.x,near.n.y,t); say(t); return}
+  const id=near.s.id;
+  if(id==='window'){go('obs');return}
+  if(id==='console'){const a=DATA.alert;
+    $('#infoBox').innerHTML=`<div class="en">NASA DONKI · LIVE SPACE WEATHER</div><h2>🖥️ شاشة ناسا</h2>
+      <div class="row"><span class="k">☀️ الانفجارات الشمسية هالأسبوع</span><span class="v">${a?(a.count||0):'—'}</span></div>
+      <div class="row"><span class="k">⚠️ مستوى الخطر</span><span class="v">${!a?'❓ ما فيه اتصال':a.level==='X'?'🔴 عالي':a.level==='M'?'🟠 متوسط':'🟢 هادي'}</span></div>
+      <div class="fact">💡 الانفجارات الشمسية ترمي إشعاع قوي، وعشان كذا رواد الفضاء عندهم ملجأ داخل المكوك يحميهم!</div>
+      <div class="actions"><button class="btn solid" onclick="$('#infoModal').classList.remove('on')">تمام</button></div>`;
+    $('#infoModal').classList.add('on'); say('هذي داتا حقيقية من ناسا عن الشمس هالأسبوع!'); return}
+  if(id==='table'){const n=Object.keys(S.done).length;
+    $('#infoBox').innerHTML=`<div class="en">MISSION MAP</div><h2>🗺️ خريطة المهمة</h2>
+      ${DATA.planets.map(p=>`<div class="row"><span class="k">${realName(p)}</span><span class="v">${S.colonies&&S.colonies[p.id]?'🏠 فيه مستعمرة':S.done[p.id]?'✅ درسته':S.target===p.id?'🎯 وجهتك':'⬜'}</span></div>`).join('')}
+      <div class="fact">ابنِ مستعمرة على كوكب صخري عشان يفتح القرار الكبير 🌍</div>
+      <div class="actions"><button class="btn solid" onclick="$('#infoModal').classList.remove('on')">تمام</button></div>`;
+    $('#infoModal').classList.add('on'); return}
+  if(id==='airlock'){ if(!S.target||S.done[S.target]){say('لازم تختار كوكب من النافذة أول! 🪟','#st_window .ic');npcBubble(500,520,'اختار كوكب من النافذة أول 🪟');return}
+    startStage(S.target); }
+}
+
+/* =================== 7) النافذة =================== */
+const LOOK={moon:{bg:'radial-gradient(circle at 35% 30%,#f2f2f2,#9c9c9c 55%,#4a4a4a)',size:70,x:12,y:28},
+ mars:{bg:'radial-gradient(circle at 35% 30%,#ffb08a,#d0502a 50%,#6e1e0c)',size:84,x:27,y:54},
+ venus:{bg:'radial-gradient(circle at 35% 30%,#fff1c4,#e0a84a 50%,#7a5214)',size:92,x:47,y:24},
+ jupiter:{bg:'radial-gradient(circle at 35% 30%,rgba(255,255,255,.35),transparent 45%),repeating-linear-gradient(170deg,#e9c99a 0 12px,#c98f5c 12px 22px,#f3dfbf 22px 30px,#a8673d 30px 36px)',size:150,x:68,y:50},
+ saturn:{bg:'radial-gradient(circle at 35% 30%,rgba(255,255,255,.35),transparent 45%),repeating-linear-gradient(175deg,#f1dfae 0 10px,#d9b978 10px 20px)',size:96,x:86,y:24,ring:true}};
+const EXO=[{bg:'radial-gradient(circle at 35% 30%,#c9b6ff,#7a4fe0 50%,#2a1366)',size:46,x:55,y:76},{bg:'radial-gradient(circle at 35% 30%,#a6f5ff,#2bb5c9 50%,#0b4a55)',size:40,x:86,y:66},{bg:'radial-gradient(circle at 35% 30%,#ffc2e6,#d6559c 50%,#5a1440)',size:36,x:12,y:62}];
+const KEPLER_LOOK={bg:'radial-gradient(circle at 35% 30%,#b8f0ff,#2f8fd8 45%,#2fa86a 62%,#0c3a5a)',size:58,x:38,y:74};
+let ei=0; DATA.planets.forEach(p=>{if(!LOOK[p.id])LOOK[p.id]=p.name.startsWith('Kepler')?KEPLER_LOOK:EXO[(ei++)%EXO.length]});
+const byId=Object.fromEntries(DATA.planets.map(p=>[p.id,p]));
+const AR_NAME={moon:'القمر',mars:'المريخ',venus:'الزهرة',jupiter:'المشتري',saturn:'زحل'};
+function realName(p){return AR_NAME[p.id]?`${AR_NAME[p.id]} (${p.name})`:p.name}
+function kind(p){return p.verdict==='gas'?'gas':p.verdict==='trap'?'hot':'rocky'}
+function stars(e){const n=Math.max(0,Math.min(5,Math.round((e||0)*5)));return '⭐'.repeat(n)+'☆'.repeat(5-n)}
+function weather(t){if(t===null||t===undefined)return '❓ ما نعرف';if(t>100)return '🔥 نار';if(t>40)return '🥵 حار';if(t>10)return '☀️ دافي';if(t>-30)return '🥶 بارد';return '🧊 متجمد'}
+(function(){let h='';for(let i=0;i<140;i++)h+=`<span class="star" style="left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${(.3+Math.random()*.7).toFixed(2)};animation-delay:-${(Math.random()*3).toFixed(1)}s"></span>`;$('#stars').innerHTML=h})();
+function renderObs(){
+  $('#planets').innerHTML=DATA.planets.map((p,i)=>{const L=LOOK[p.id];return `<button class="planet ${S.target===p.id?'target':''}" data-id="${p.id}" style="left:${L.x}%;top:${L.y}%;width:${L.size}px;height:${L.size}px;background:${L.bg};animation-delay:-${i*.8}s">${L.ring?'<span class="pring"></span>':''}${S.colonies&&S.colonies[p.id]?'<span class="done">🏠</span>':S.done[p.id]?'<span class="done">✓</span>':''}<span class="lbl">${p.nickname}<br><small style="opacity:.75;font-size:11px">${realName(p)}</small></span></button>`}).join('');
+  $$('.planet').forEach(b=>b.onclick=()=>openInfo(b.dataset.id));
+  const n=Object.keys(S.done).length; const col=Object.keys(S.colonies||{}).length; $('#finaleBtn').disabled=!(col>=1||n>=3);
+  $('#obsMsg').textContent=(col>=1||n>=3)?`ممتاز يا قائد! القرار الكبير صار مفتوح 🌍`:'اضغط على أي كوكب، وابنِ مستعمرة على كوكب صخري 🏗️';
+  say((col>=1||n>=3)?'بنيت مستعمرة! اضغط القرار الكبير 🌍':'اضغط على أي كوكب يعجبك عشان تشوف معلوماته', (col>=1||n>=3)?'#finaleBtn':'.planet:not(:has(.done))');
+}
+$('#obsBack').onclick=()=>go('ship');
+function openInfo(id){
+  const p=byId[id],pct=Math.round((p.esi||0)*100),c=CH[S.profile.char];
+  const extra=c.id==='noura'?`<div class="fact" style="border-color:#9b6bff">🔭 <b>قدرة د. نورة:</b> الحجم ${p.radius.toFixed(2)} من الأرض · الجاذبية ${p.gravity?p.gravity.toFixed(2):'؟'} من الأرض</div>`:'';
+  const sci=S.sci?`<div class="sci">${Object.entries(p.raw||{}).map(([k,v])=>`${k}: ${v===null?'—':v}`).join(' · ')}<br>ESI = ${(p.esi||0).toFixed(2)} · NASA</div>`:'';
+  $('#infoBox').innerHTML=`<div class="en">${p.name.toUpperCase()}</div><h2 style="margin-bottom:2px">${realName(p)}</h2><div style="color:var(--muted);font-weight:700;margin-bottom:10px">لقبه في اللعبة: ${p.nickname}</div>
+   <div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><span class="k">🌍 يشبه الأرض</span><span class="v">${stars(p.esi)} ${pct}%</span></div><div class="bar"><i style="width:${pct}%;background:${pct>=80?'var(--lime)':pct>=60?'var(--gold)':'var(--red)'}"></i></div></div>
+   <div class="row"><span class="k">🌡️ الجو</span><span class="v">${weather(p.temp_C)}</span></div>
+   <div class="row"><span class="k">💧 الماء</span><span class="v">${p.water}</span></div>
+   <div class="row"><span class="k">☢️ الخطر</span><span class="v">${p.danger}</span></div>
+   <div class="row"><span class="k">🚀 الرحلة</span><span class="v">${p.trip}</span></div>
+   <div class="fact">💡 ${p.fact}</div>${extra}${sci}
+   <div class="actions"><button class="btn ghost" onclick="$('#infoModal').classList.remove('on')">إغلاق</button><button class="btn solid" id="pickBtn">🎯 اختاره كوجهة</button></div>`;
+  $('#pickBtn').onclick=()=>{S.target=id;save();$('#infoModal').classList.remove('on');go('ship')};
+  $('#infoModal').classList.add('on');
+  say(`هذا ${realName(p).replace(/\s*\(.*\)/,'')}. ${weather(p.temp_C)}. إذا عجبك اضغط اختاره كوجهة`,'#pickBtn');
+}
+$('#finaleBtn').onclick=()=>{$('#missionsDone').innerHTML='<div class="earth"><b>🌍 مهماتك الأرضية:</b><br>'+Object.values(S.done).map(m=>'• '+m).join('<br>')+'</div>';go('finale');say('المفاجأة! أنسب كوكب هو الأرض. حافظ عليها 💚')};
+$('#againBtn').onclick=()=>{S.done={};S.colonies={};S.target=null;save();go('ship')};
+
+/* =================== 8) المراحل =================== */
+let timers=[];function clearTimers(){timers.forEach(t=>{clearInterval(t);clearTimeout(t)});timers=[];document.onkeydown=null}
+let cur=null,tasks={};
+function log(t){const l=$('#log');l.innerHTML+=`<div>› ${t}</div>`;l.scrollTop=l.scrollHeight}
+function setTasks(list){tasks={};list.forEach(([k,t])=>tasks[k]={t,ok:false});drawTasks()}
+function doneTask(k){if(tasks[k]&&!tasks[k].ok){tasks[k].ok=true;drawTasks();const left=Object.entries(tasks).find(([,v])=>!v.ok);if(left)say('ممتاز! الحين: '+left[1].t);else say(kind(cur)==='rocky'?'خلصت الدراسة! الحين نبني مستعمرة 🏗️':'خلصت كل المهام! اضغط خلصت الدراسة ✅','#reportBtn')}}
+function drawTasks(){$('#tasks').innerHTML=Object.values(tasks).map(x=>`<div class="task ${x.ok?'ok':''}">${x.ok?'✅':'⬜'} ${x.t}</div>`).join('');$('#reportBtn').disabled=!Object.values(tasks).every(x=>x.ok)}
+const SKY={moon:'linear-gradient(180deg,#000,#141414)',mars:'linear-gradient(180deg,#c9825c,#e8a37a 60%,#f0c09a)',venus:'linear-gradient(180deg,#7a4a12,#d99a3a 55%,#f3c061)',jupiter:'linear-gradient(180deg,#a8673d,#e9c99a 40%,#c98f5c 70%,#5a3216)',saturn:'linear-gradient(180deg,#8f7440,#f1dfae 45%,#d9b978 75%,#6a5220)',exo:'linear-gradient(180deg,#120a2e,#3b2a7a 60%,#7a5fd6)'};
+const GROUND={moon:'linear-gradient(180deg,#8a8a8a,#4a4a4a)',mars:'linear-gradient(180deg,#b5502a,#6e1e0c)',exo:'linear-gradient(180deg,#5a4a8a,#241a4a)',venus:'linear-gradient(180deg,#8a5a1a,#4a2a08)'};
+function startStage(id){
+  clearTimers();cur=byId[id];go('stage');$('#log').innerHTML='';$('#stEn').textContent=cur.name.toUpperCase()+' · FIELD STUDY';
+  $('#stTitle').textContent='🔬 دراسة '+realName(cur);$('#sky').style.background=SKY[id]||SKY.exo;
+  const k=kind(cur); $('#reportBtn').textContent = k==='rocky' ? '🏗️ ابنِ مستعمرة هنا' : '✅ خلصت الدراسة';
+  if(k==='gas')gasStage();else if(k==='hot')hotStage();else rockyStage();
+}
+function me(){return avatar(CH[S.profile.char])}
+function rockyStage(){
+  const id=cur.id,g=cur.gravity||1;
+  $('#stageArt').innerHTML=`<div class="ground" style="background:${GROUND[id]||GROUND.exo}"></div><div class="marker" style="bottom:calc(26% + 70px)">في الأرض تنط لهنا</div>
+    <div class="earthghost" style="bottom:26%">${me()}</div><div class="astro" id="astro" style="bottom:26%">${me()}</div>`;
+  setTasks([['jump','🦘 جرّب تنط واختبر الجاذبية'],['temp','🌡️ افحص الحرارة'],['water','💧 دوّر على ماء'],['air','🌬️ افحص الهواء']]);
+  $('#tools').innerHTML=`<button class="btn" id="tJump">🦘 نط!</button><button class="btn" id="tTemp">🌡️ ميزان الحرارة</button><button class="btn" id="tWater">💧 جهاز الماء</button><button class="btn" id="tAir">🌬️ فحص الهواء</button>`;
+  log(cur.gravity?`هبطنا على ${realName(cur)}! 🛬 الجاذبية هنا ${g.toFixed(2)} من الأرض.`:`هبطنا على ${cur.nickname}! 🛬 ما نعرف جاذبيته بالضبط.`);
+  say('وصلنا! اضغط زر نط وشوف كم تنط هنا 🦘','#tJump');
+  let jumping=false;
+  $('#tJump').onclick=()=>{if(jumping)return;jumping=true;const h=Math.min(380,70/g),t0=performance.now(),dur=Math.min(4000,900/Math.sqrt(g)),a=$('#astro');
+    const tick=setInterval(()=>{const x=(performance.now()-t0)/dur;if(x>=1){clearInterval(tick);a.style.bottom='26%';jumping=false;return}a.style.bottom=`calc(26% + ${4*h*x*(1-x)}px)`},16);timers.push(tick);
+    const t=1/g;log(t>1.15?`نطيت أعلى ${t.toFixed(1)} مرة من الأرض! 🤸`:t<.85?'نطتك صارت أقصر! الجاذبية أقوى 💪':'نفس نطتك في الأرض تقريبًا 🙂');doneTask('jump')};
+  $('#tTemp').onclick=()=>{log(`🌡️ الحرارة: ${cur.temp_C!==null?Math.round(cur.temp_C)+'° مئوية':'ما نعرف'} ← ${weather(cur.temp_C)}`);doneTask('temp')};
+  $('#tWater').onclick=()=>{log(`💧 الماء: ${cur.water}`);doneTask('water')};
+  $('#tAir').onclick=()=>{log(`🌬️ الهواء: ${cur.air}`);doneTask('air')};
+}
+function gasStage(){
+  const g=cur.gravity||1;
+  $('#stageArt').innerHTML=`<div class="clouds"></div><div class="gauge"><b>ضغط</b><i id="press" style="height:20%"></i></div>
+    <div class="bigmsg" id="gmsg">ما فيه أرض! 😱<br><span style="font-size:18px">اضغط "شغّل الدفع" (أو المسافة) عشان ما تغرق في الغيوم</span></div><div class="astro" id="astro" style="bottom:55%">${me()}</div>`;
+  setTasks([['float','🎈 اطفُ 15 ثانية بدون ما تغرق'],['temp','🌡️ افحص الحرارة'],['air','🌬️ افحص الغازات']]);
+  $('#tools').innerHTML=`<button class="btn solid" id="tThrust" style="grid-column:1/-1">🔥 شغّل الدفع</button><button class="btn" id="tTemp">🌡️ ميزان الحرارة</button><button class="btn" id="tAir">🌬️ فحص الغازات</button>`;
+  log(`دخلنا غيوم ${cur.nickname} ☁️ ما فيه سطح! الجاذبية ${g.toFixed(2)} من الأرض.`);
+  say('ما فيه أرض هنا! اضغط شغّل الدفع كثير عشان ما تغرق','#tThrust');
+  let y=55,v=0,alive=0,ok=false;const thrust=()=>{v+=1.6};
+  $('#tThrust').onclick=thrust;document.onkeydown=e=>{if(e.code==='Space'){e.preventDefault();thrust()}};
+  const loopG=setInterval(()=>{v-=.02*g;v*=.96;y=Math.max(4,Math.min(80,y+v*.6));const a=$('#astro');a.style.bottom=y+'%';a.style.transform=`rotate(${Math.sin(performance.now()/400)*12}deg)`;$('#press').style.height=(100-y)+'%';
+    if(y<=4){v=0;y=55;alive=0;log('⚠️ نزلت والضغط قوي جدًا! رجعناك فوق.')}else if(!ok){alive+=.05;if(alive>=15){ok=true;doneTask('float');$('#gmsg').innerHTML='👏 تعلمت إن الكوكب الغازي ما فيه أرض!';log('🎈 طفيت 15 ثانية!')}}},50);timers.push(loopG);
+  $('#tTemp').onclick=()=>{log(`🌡️ الحرارة: ${Math.round(cur.temp_C)}° مئوية 🧊`);doneTask('temp')};
+  $('#tAir').onclick=()=>{log(`🌬️ الغازات: ${cur.air}`);doneTask('air')};
+}
+function hotStage(){
+  $('#stageArt').innerHTML=`<div class="ground" style="background:${GROUND.venus}"></div><div class="gauge"><b>حرارة</b><i id="heat" style="height:5%"></i></div>
+    <div class="bigmsg" id="hmsg">الجو هنا حار جدًا! 🔥<br><span style="font-size:18px">ما نقدر ننزل بنفسنا، نرسل مسبار آلي 🤖</span></div><div class="probe" id="probe"></div>`;
+  setTasks([['probe','🤖 أرسل المسبار'],['photo','📸 صوّر 3 صور قبل ما يذوب'],['air','🌬️ افحص الهواء']]);
+  $('#tools').innerHTML=`<button class="btn solid" id="tProbe" style="grid-column:1/-1">🤖 أرسل المسبار</button><button class="btn" id="tPhoto" disabled>📸 صوّر</button><button class="btn" id="tAir">🌬️ فحص الهواء</button>`;
+  log('وصلنا الزهرة 🟡 حرارتها تذوّب الرصاص!'); say('حار مرة! أرسل المسبار، وبعدين صوّر بسرعة','#tProbe');
+  let photos=0,heat=5,running=false;
+  $('#tProbe').onclick=()=>{if(running)return;running=true;photos=0;heat=5;$('#probe').textContent='🛰️';$('#tPhoto').disabled=false;doneTask('probe');log('🤖 المسبار نزل! صوّر بسرعة...');
+    const t=setInterval(()=>{heat+=1.2;$('#heat').style.height=Math.min(100,heat)+'%';if(heat>=100){clearInterval(t);running=false;$('#probe').textContent='💥';$('#tPhoto').disabled=true;if(photos<3)log('💥 المسبار ذاب! أرسل واحد ثاني.')}},100);timers.push(t)};
+  $('#tPhoto').onclick=()=>{if(!running)return;photos++;log(`📸 صورة ${photos}: ${['غيوم سامة صفرا ☁️','صخور حارة متوهجة 🪨','سما برتقالية ثقيلة 🟠'][Math.min(photos-1,2)]}`);if(photos>=3){doneTask('photo');$('#hmsg').innerHTML='👏 الحين تعرف ليش ما ينفع نعيش هنا';$('#tPhoto').disabled=true}};
+  $('#tAir').onclick=()=>{log(`🌬️ الهواء: ${cur.air}`);doneTask('air')};
+}
+$('#backBtn').onclick=()=>{clearTimers();go('ship')};
+$('#reportBtn').onclick=()=>{clearTimers(); if(kind(cur)==='rocky'){startColony(cur);return}const [title,,lines]=DATA.results[cur.verdict];const m=DATA.earth[cur.verdict];S.done[cur.id]=m;S.target=null;save();
+  $('#infoBox').innerHTML=`<div class="en">DISCOVERY</div><h2>${title}</h2><div class="report">${lines.map(l=>`<div class="check">${l}</div>`).join('')}</div>
+   <div class="earth"><b>🌍 مهمتك الأرضية اليوم:</b><br>${m}</div><div class="actions"><button class="btn solid" id="toShip">↩ رجوع للمكوك</button></div>`;
+  $('#toShip').onclick=()=>{$('#infoModal').classList.remove('on');go('ship')};$('#infoModal').classList.add('on');say(m,'#toShip')};
+
+
+/* =================== 🏗️ المستعمرة =================== */
+const MODS={
+ hab:  {i:'🏠',n:'مسكن',cost:20,d:'+4 أماكن للسكان'},
+ solar:{i:'☀️',n:'ألواح شمسية',cost:10,d:'طاقة حسب ضوء الشمس'},
+ rtg:  {i:'⚛️',n:'مفاعل صغير',cost:30,d:'+8 طاقة ثابتة'},
+ drill:{i:'⛏️',n:'حفارة جليد',cost:15,d:'ماء إذا فيه جليد'},
+ farm: {i:'🌱',n:'بيت زراعي',cost:15,d:'+6 أكل (ياخذ ماء وطاقة)'},
+ oxy:  {i:'🫁',n:'مولد أكسجين',cost:15,d:'+5 أكسجين (ياخذ طاقة)'},
+ shield:{i:'🛡️',n:'درع إشعاع',cost:20,d:'يحمي من الإشعاع'},
+ mine: {i:'🪨',n:'منجم',cost:10,d:'+4 مواد بناء كل يوم'},
+};
+let C=null, cTimer=null, wanderT=null;
+const GROUND_C={moon:'radial-gradient(circle at 30% 20%,#9a9a9a,#5a5a5a 60%,#2e2e2e)',mars:'radial-gradient(circle at 30% 20%,#d0703f,#9a3c1c 60%,#5a1c0a)',exo:'radial-gradient(circle at 30% 20%,#7a68b8,#43357a 60%,#1c1440)',kepler:'radial-gradient(circle at 30% 20%,#5fa87a,#2f6a4a 60%,#143024)'};
+function planetEnv(p){
+  const ice = p.water.includes('🧊')?1 : p.water.includes('❓')?0.5 : 0;
+  const t = p.temp_C===null||p.temp_C===undefined ? -20 : p.temp_C;
+  const heat = t< -100 ? 0.6 : t< -30 ? 0.35 : t<0 ? 0.15 : 0;
+  const rad = p.danger.includes('🔴')?2 : 1;
+  return {sun:Math.min(1.5,p.insol||0), ice, heat, rad, co2: p.id==='mars'};
+}
+function startColony(p){
+  const ch=S.profile.char;
+  C={p, env:planetEnv(p), day:1, pop:4, health:100, res:{mat:80,energy:30,water:40,food:40,oxy:40}, last:{}, grid:Array(28).fill(null),
+     sel:'hab', dust:0, storm:0, warned:false, ch, running:false, ended:false};
+  go('colony');
+  $('#cEn').textContent=p.name.toUpperCase()+' · COLONY';
+  $('#cTitle').textContent='🏗️ مستعمرة على '+realName(p);
+  $('#cground').style.background = p.name.startsWith('Kepler')?GROUND_C.kepler:(GROUND_C[p.id]||GROUND_C.exo);
+  // مركز القيادة جاهز من البداية
+  C.grid[10]='hab';
+  $('#mods').innerHTML=Object.entries(MODS).map(([k,m])=>`<button class="mod ${k==='hab'?'sel':''}" data-k="${k}"><b>${m.i} ${m.n} · ${m.cost}🪨</b><span>${modDesc(k)}</span></button>`).join('');
+  $$('.mod').forEach(b=>b.onclick=()=>{C.sel=b.dataset.k;$$('.mod').forEach(x=>x.classList.toggle('sel',x===b))});
+  $('#clog').innerHTML='';
+  const e=C.env;
+  clog(`🛬 هبطنا! ضوء الشمس هنا ${Math.round(e.sun*100)}% من الأرض، ${e.ice?'وفيه جليد ماء 🧊':'وما فيه جليد ❌'}.`);
+  if(e.heat) clog(`🥶 الجو بارد، فالمساكن تحتاج طاقة زيادة للتدفئة.`);
+  if(e.co2) clog(`🫁 هواء المريخ فيه ثاني أكسيد الكربون، ومولد الأكسجين يشتغل أحسن هنا (مثل جهاز MOXIE حق ناسا!)`);
+  const bonus={lina:'🌱 قدرة لينا: البيوت الزراعية تنتج أكثر بـ 50%',reem:'🛡️ قدرة م. ريم: الدروع أقوى مرتين',salman:'🩺 قدرة د. سلمان: الطاقم يتعافى أسرع',faisal:'☀️ قدرة الكابتن فيصل: يعرف العواصف الشمسية قبل لا تجي',noura:'🔭 قدرة د. نورة: تلقى معادن زيادة (+2 مواد كل يوم)'}[ch];
+  clog(bonus);
+  renderColony(); wander();
+  say('ابنِ مستعمرتك! اختار ☀️ ألواح شمسية، واضغط على مربع فاضي','.mod[data-k="solar"]');
+}
+function modDesc(k){
+  const e=C?C.env:null;
+  if(!e) return MODS[k].d;
+  if(k==='solar') return `+${(10*e.sun).toFixed(1)} طاقة (الشمس هنا ${Math.round(e.sun*100)}%)`;
+  if(k==='drill') return e.ice?`+${Math.round(6*e.ice)} ماء`:'❌ ما فيه جليد هنا';
+  if(k==='farm') return `+${C.ch==='lina'?9:6} أكل · ياخذ 2💧 و2⚡`;
+  if(k==='oxy') return `+${e.co2?8:5} أكسجين · ياخذ 2⚡`;
+  return MODS[k].d;
+}
+function count(k){return C.grid.filter(x=>x===k).length}
+function cap(){return 4*count('hab')}
+function calc(){
+  const e=C.env, pop=C.pop, st=C.storm>0;
+  const sunMul = C.dust>0 ? 0.4 : 1;
+  const prod={energy: count('solar')*10*e.sun*sunMul + count('rtg')*8,
+              water: count('drill')*6*e.ice, food: count('farm')*(C.ch==='lina'?9:6), oxy: count('oxy')*(e.co2?8:5),
+              mat: 6 + count('mine')*4 + (C.ch==='noura'?2:0)};
+  const use={energy: count('farm')*2 + count('oxy')*2 + count('drill')*1 + pop*(0.4+e.heat*1.5),
+             water: count('farm')*2 + pop*1, food: pop*1, oxy: pop*1, mat:0};
+  const shield = count('shield')*(C.ch==='reem'?2:1);
+  const radDmg = Math.max(0, e.rad*(st?3:1) - shield*2) * (st&&C.ch==='faisal'?0.5:1);
+  return {prod,use,radDmg};
+}
+function renderColony(){
+  const {prod,use,radDmg}=calc(); const r=C.res;
+  const items=[['mat','🪨','مواد بناء'],['energy','⚡','طاقة'],['water','💧','ماء'],['food','🥬','أكل'],['oxy','🫁','أكسجين']];
+  $('#res').innerHTML=`<div class="rc"><span class="t">📅 اليوم</span><span class="n">${C.day}</span><span class="d">${C.dust>0?'🌪️ عاصفة غبار':C.storm>0?'☀️ عاصفة شمسية':'جو هادي'}</span></div>
+    <div class="rc"><span class="t">👥 السكان</span><span class="n">${C.pop}/${cap()}</span><span class="d">الهدف: 12</span></div>`+
+    items.map(([k,ic,t])=>{const d=(prod[k]||0)-(use[k]||0);return `<div class="rc ${r[k]<8&&k!=='mat'?'low':''}"><span class="t">${ic} ${t}</span><span class="n">${Math.floor(r[k])}</span><span class="d ${d>=0?'up':'down'}">${d>=0?'▲ +':'▼ '}${d.toFixed(1)} باليوم</span></div>`}).join('')+
+    `<div class="rc ${radDmg>0?'low':''}"><span class="t">☢️ إشعاع</span><span class="n">${radDmg>0?'خطر':'آمن'}</span><span class="d ${radDmg>0?'down':'up'}">${radDmg>0?'-'+radDmg.toFixed(0)+' صحة':'محمي'}</span></div>`;
+  $('#cgrid').innerHTML=C.grid.map((k,i)=>k?`<div class="tile built ${i===C.justBuilt?'new':''}" data-i="${i}">${MODS[k].i}<small>${MODS[k].n}</small></div>`:`<div class="tile" data-i="${i}"></div>`).join('');
+  $$('#cgrid .tile:not(.built)').forEach(t=>t.onclick=()=>build(+t.dataset.i)); C.justBuilt=null;
+  $('#hBar').style.width=Math.max(0,C.health)+'%'; $('#hTxt').textContent=Math.round(C.health)+'%';
+  $('#cGoal').innerHTML=`🎯 <b>الهدف:</b> وصّل المستعمرة لـ <b>12 ساكن</b> وحافظ على صحتهم ❤️<br><span style="color:var(--muted);font-size:12px">السكان يزيدون إذا فيه مساكن فاضية وأكل وماء وأكسجين كفاية</span>`;
+  $$('.mod').forEach(b=>{const k=b.dataset.k;b.disabled=C.res.mat<MODS[k].cost;b.querySelector('span').textContent=modDesc(k)});
+}
+function build(i){
+  if(C.ended) return; const m=MODS[C.sel];
+  if(C.res.mat<m.cost){clog(`❌ ما عندك مواد كفاية لـ ${m.n}. استنى يوم أو ابنِ 🪨 منجم.`);say('ما عندك مواد بناء كفاية! شغّل الأيام عشان تجمع مواد','#cPlay');return}
+  if(C.sel==='drill'&&!C.env.ice){clog('❌ ما فيه جليد هنا، الحفارة ما بتطلع ماء!');say('هالكوكب ما فيه جليد! جرّب مبنى ثاني');return}
+  C.res.mat-=m.cost; C.grid[i]=C.sel; C.justBuilt=i; clog(`🏗️ بنيت ${m.i} ${m.n}`);
+  renderColony(); tipNext();
+}
+function tipNext(){
+  const {prod,use}=calc();
+  if(!count('solar')&&!count('rtg')) return say('تحتاج طاقة! ابنِ ☀️ ألواح شمسية','.mod[data-k="solar"]');
+  if(prod.energy<use.energy) return say('الطاقة ما تكفي! ابنِ ألواح شمسية أو ⚛️ مفاعل','.mod[data-k="'+(C.env.sun<0.5?'rtg':'solar')+'"]');
+  if(!count('farm')) return say('الطاقم يحتاج أكل! ابنِ 🌱 بيت زراعي','.mod[data-k="farm"]');
+  if(!count('oxy')) return say('ما فيه هواء نتنفسه! ابنِ 🫁 مولد أكسجين','.mod[data-k="oxy"]');
+  if(C.env.ice&&!count('drill')) return say('فيه جليد هنا! ابنِ ⛏️ حفارة عشان تطلع ماء','.mod[data-k="drill"]');
+  if(!count('shield')) return say('الإشعاع خطير! ابنِ 🛡️ درع إشعاع','.mod[data-k="shield"]');
+  if(cap()<=C.pop) return say('ما فيه مكان لسكان جدد! ابنِ 🏠 مسكن','.mod[data-k="hab"]');
+  if(!C.running) say('ممتاز! اضغط شغّل الأيام وشوف مستعمرتك تكبر ▶','#cPlay');
+}
+function clog(t){const l=$('#clog');l.innerHTML+=`<div>› ${t}</div>`;l.scrollTop=l.scrollHeight}
+function flash(color){const f=$('#flash');f.style.background=color;f.style.opacity=.55;setTimeout(()=>f.style.opacity=0,350)}
+function nextDay(){
+  if(C.ended) return;
+  // أحداث اليوم
+  const a=DATA.alert, stormChance = a&&(a.level==='X'||a.level==='M') ? 0.16 : 0.08;
+  if(C.storm>0) C.storm--; if(C.dust>0) C.dust--;
+  if(C.warned){C.warned=false;C.storm=1;clog('☀️ العاصفة الشمسية وصلت! الدروع تحمي الطاقم.');flash('#ffb347')}
+  else if(Math.random()<stormChance && C.day>2){
+    if(C.ch==='faisal'){C.warned=true;clog('👨‍✈️ الكابتن فيصل: "عاصفة شمسية جاية بكرا! ابنوا دروع بسرعة"');say('عاصفة شمسية جاية بكرا! ابنِ 🛡️ درع','.mod[data-k="shield"]')}
+    else{C.storm=1;clog(`☀️ عاصفة شمسية! ${a&&a.level!=='calm'?'(ناسا رصدت انفجارات حقيقية هالأسبوع)':''}`);flash('#ffb347');say('عاصفة شمسية! الدروع تحمي الطاقم من الإشعاع 🛡️')}
+  }
+  if(C.env.co2 && Math.random()<0.1 && C.day>3){C.dust=2;clog('🌪️ عاصفة غبار على المريخ! الألواح الشمسية تنتج أقل يومين.');flash('#c9825c')}
+  if(Math.random()<0.05 && C.day>4){const built=C.grid.map((k,i)=>k&&i!==10?i:-1).filter(i=>i>=0);if(built.length){const i=built[Math.floor(Math.random()*built.length)];clog(`☄️ نيزك صغير طاح على ${MODS[C.grid[i]].n}! انهدم.`);C.grid[i]=null;flash('#ff4d5e')}}
+  // الإنتاج والاستهلاك
+  const {prod,use,radDmg}=calc(); const r=C.res; let short=[];
+  for(const k of ['energy','water','food','oxy','mat']){r[k]+= (prod[k]||0)-(use[k]||0); if(r[k]<0){if(k!=='mat')short.push(k);r[k]=0} r[k]=Math.min(r[k],k==='mat'?200:150)}
+  const names={energy:'⚡ الطاقة',water:'💧 الماء',food:'🥬 الأكل',oxy:'🫁 الأكسجين'};
+  if(short.length){C.health-=6*short.length;clog(`⚠️ خلص ${short.map(k=>names[k]).join(' و ')}! صحة الطاقم تنزل.`);flash('#ff4d5e');tipNext()}
+  if(radDmg>0){C.health-=radDmg;clog(`☢️ الإشعاع أثر على الطاقم (-${radDmg.toFixed(0)} صحة). ابنِ دروع!`)}
+  if(!short.length&&radDmg===0) C.health=Math.min(100,C.health+(C.ch==='salman'?7:4));
+  // نمو السكان
+  if(C.day%2===0 && C.pop<cap() && r.food>8 && r.water>8 && r.oxy>8 && C.health>40){C.pop=Math.min(cap(),C.pop+2);clog(`👶 وصل ${2} سكان جدد! صرتوا ${C.pop}`)}
+  C.day++; renderColony(); wander();
+  if(C.health<=0) return endColony(false);
+  if(C.pop>=12) return endColony(true);
+}
+function wander(){
+  const wrap=$('#colonists'); if(!C) return; const box=$('#cgrid').getBoundingClientRect(), base=$('.cgrid-wrap').getBoundingClientRect();
+  while(wrap.children.length<Math.min(C.pop,16)){const s=document.createElement('div');s.className='colonist';s.textContent='🧑‍🚀';s.style.left=(20+Math.random()*70)+'%';s.style.top=(20+Math.random()*60)+'%';wrap.appendChild(s)}
+  while(wrap.children.length>Math.min(C.pop,16)) wrap.lastChild.remove();
+  [...wrap.children].forEach(s=>{s.style.left=(6+Math.random()*86)+'%';s.style.top=(8+Math.random()*80)+'%'});
+}
+function stopColony(){clearInterval(cTimer);cTimer=null;clearInterval(wanderT);wanderT=null;if(C)C.running=false;const b=$('#cPlay');if(b)b.textContent='▶ شغّل الأيام'}
+$('#cPlay').onclick=()=>{ if(!C||C.ended) return;
+  if(C.running){stopColony();return}
+  C.running=true;$('#cPlay').textContent='⏸ وقّف';cTimer=setInterval(nextDay,1600);wanderT=setInterval(wander,2600);clearHint()};
+$('#cStep').onclick=()=>{if(C&&!C.ended){stopColony();nextDay()}};
+$('#cExit').onclick=()=>{stopColony();go('ship')};
+function endColony(win){
+  C.ended=true; stopColony(); const p=C.p;
+  if(win){
+    S.colonies[p.id]={day:C.day,pop:C.pop}; S.done[p.id]=DATA.earth[p.verdict]; S.target=null; save();
+    $('#infoBox').innerHTML=`<div class="en">COLONY ESTABLISHED · DAY ${C.day}</div><h2>🎉 بنيت مستعمرة على ${realName(p)}!</h2>
+      <div class="report"><div class="check">👥 ${C.pop} سكان عايشين فيها</div><div class="check">❤️ صحة الطاقم ${Math.round(C.health)}%</div><div class="check">📅 خلال ${C.day} يوم</div></div>
+      <div class="fact">💡 تعلمت إن العيش برا الأرض يحتاج: طاقة، وماء، وأكل، وأكسجين، وحماية من الإشعاع. وكلها أشياء الأرض تعطينا إياها ببلاش!</div>
+      <div class="earth"><b>🌍 مهمتك الأرضية اليوم:</b><br>${DATA.earth[p.verdict]}</div>
+      <div class="actions"><button class="btn solid" id="toShip2">↩ رجوع للمكوك</button></div>`;
+    say('برافو! بنيت مستعمرة كاملة! 🎉','#toShip2');
+  } else {
+    $('#infoBox').innerHTML=`<div class="en">MISSION FAILED</div><h2>😢 الطاقم ما تحمّل</h2>
+      <div class="fact">المستعمرة تحتاج توازن: كل ما زاد السكان، زاد احتياجهم للأكل والماء والأكسجين والطاقة. جرّب مرة ثانية، وابنِ دروع ومولدات أكثر!</div>
+      <div class="actions"><button class="btn ghost" id="toShip2">↩ المكوك</button><button class="btn solid" id="retry">🔄 جرّب مرة ثانية</button></div>`;
+    setTimeout(()=>{const b=$('#retry');if(b)b.onclick=()=>{$('#infoModal').classList.remove('on');startColony(p)}},0);
+    say('ولا يهمك! جرّب مرة ثانية وانتبه للموارد','#retry');
+  }
+  $('#infoModal').classList.add('on');
+  $('#toShip2').onclick=()=>{$('#infoModal').classList.remove('on');go('ship')};
+}
+
+/* =================== تشغيل =================== */
+applySettings(); updateProgress(); go('menu');
+</script>
+</body>
+</html>
