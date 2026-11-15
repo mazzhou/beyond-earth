@@ -18,7 +18,7 @@
    ```
    pip install -r requirements.txt
    ```
-4. شغلي اللعبة:
+4. شغل اللعبة:
    ```
    streamlit run app.py
    ```
